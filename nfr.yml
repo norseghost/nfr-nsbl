@@ -1,0 +1,16 @@
+---
+- name: Set up VPSes
+  hosts: vps
+  roles:
+    - harden
+    - tailscale
+
+- name: Set up headscale orchestrator
+  hosts: vpn
+  roles:
+    - headscale
+
+- name: Set up server nodes
+  hosts: srv
+  roles:
+    - docker
