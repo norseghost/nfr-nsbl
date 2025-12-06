@@ -1,9 +1,8 @@
 ---
-- name: Set up VPSes
+- name: Common setup
   hosts: vps
   roles:
     - harden
-    - tailscale
 
 - name: Set up headscale orchestrator
   hosts: vpn
