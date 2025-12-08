@@ -1,46 +1,46 @@
 ---
-- name: Create group {{ user.group }}
-  group:
+- name: Create user group {{ user.group }}
+  ansible.builtin.group:
     name: "{{ user.group }}"
     state: present
   tags:
     - user
 
-- name: Create user {{ user.name }} and assign to group
-  user:
+- name: Create user {{ user.name }}
+  ansible.builtin.user:
     name: "{{ user.name }}"
     group: "{{ user.group }}"
     password: "{{ user.password }}"
     update_password: on_create
     uid: "{{ user.uid }}"
     groups: sudo
-    append: yes
+    append: true
   tags:
     - user
 
 - name: Add SSH config directory for {{ user.name }}
-  file:
+  ansible.builtin.file:
     path: ~/.ssh
-    mode: 0700
+    mode: "0700"
     state: directory
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   tags:
     - ssh
 
 - name: Copy key files for ssh to {{ user.name }}
-  copy:
+  ansible.builtin.copy:
     content: id_ed25519_admin
     # TODO: more custom keys, ssh agents, etc
     dest: ~/.ssh/id_ed25519
-    mode: 0600
-  become: yes
+    mode: "0600"
+  become: true
   become_user: "{{ user.name }}"
   tags:
     - ssh
 
-- name: Add SSH public key to {{ user.name }} authorised keys
-  authorized_key:
+- name: Add SSH public key to {{ user.name }}
+  ansible.posix.authorized_key:
     key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG3mZSaRskxRMZmjYmAVMljWAWyR5an9bTrxtBGPSKK4
     state: present
     user: "{{ user.name }}"
