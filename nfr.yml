@@ -4,10 +4,10 @@
   roles:
     - harden
 
-- name: Set up headscale orchestrator
-  hosts: vpn
+- name: Backup server
+  hosts: backup
   roles:
-    - headscale
+    - backup
 
 - name: Set up server nodes
   hosts: srv

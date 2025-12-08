@@ -1,0 +1,15 @@
+---
+- name: Ensure dependencies for btrbk
+  apt:
+    name: curl
+    state: present
+    update_cache: yes
+
+- name: Install btrbk from package
+  apt:
+    name: btrbk
+    state: present
+  register: btrbk_installed
+  failed_when: false
+
+
