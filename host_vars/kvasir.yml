@@ -1,0 +1,14 @@
+---
+btrbk:
+  - backup_root: "/mnt/backups"
+btrbk_hosts:
+  mimer:
+    volumes:
+      - /mnt/disk4/photos
+      - /mnt/sysdata/backups/appdata
+      - /mnt/sysdata/backups/usb
+      - /mnt/sysdata/backups/filehistory
+      - /mnt/sysdata/vault
+  tyr:
+    volumes:
+      - /home
