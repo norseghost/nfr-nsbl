@@ -1,0 +1,8 @@
+---
+- name: Ensure DNS record for {{ headscale.subdomain }}.{{ headscale.domain }}
+  community.general.cloudflare_dns:
+    zone: "{{ headscale.domain }}"
+    record: "{{ headscale.subdomain }}"
+    type: A
+    value: "{{ ipv4_addr }}"
+    api_token: "{{ cloudflare.api_token }}"

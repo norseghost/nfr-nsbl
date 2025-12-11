@@ -1,0 +1,4 @@
+---
+headscale:
+  domain: "{{ dns.domain }}"
+  subdomain: bifrost
