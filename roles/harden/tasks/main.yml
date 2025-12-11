@@ -41,7 +41,7 @@
 
 - name: Add SSH public key to {{ user.name }}
   ansible.posix.authorized_key:
-    key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG3mZSaRskxRMZmjYmAVMljWAWyR5an9bTrxtBGPSKK4
+    key: "{{ user.pubkey }}"
     state: present
     user: "{{ user.name }}"
   tags:

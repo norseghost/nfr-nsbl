@@ -1,4 +1,13 @@
 ---
+- name: Pre flight tasks
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Define shorthand for host ipv4
+      ansible.builtin.set_fact:
+        ipv4_addr: "{{ ansible_facts.default_ipv4.address }}"
+
 - name: Common setup
   hosts: vps
   roles:
