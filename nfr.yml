@@ -2,7 +2,6 @@
 - name: Pre flight tasks
   hosts: all
   gather_facts: true
-
   tasks:
     - name: Define shorthand for host ipv4
       ansible.builtin.set_fact:
@@ -20,5 +19,7 @@
 
 - name: Set up server nodes
   hosts: srv
+- name: Set up headscale orchestrator
+  hosts: vpn
   roles:
-    - docker
+    - headscale

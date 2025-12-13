@@ -2,3 +2,8 @@
 headscale:
   domain: "{{ dns.domain }}"
   subdomain: bifrost
+  acme:
+    cert_dir: "/etc/headscale/certs"
+    email: "{{ acme.email }}"
+    directory: "{{ acme.directory }}"
+headscale_fqdn: "{{ headscale.subdomain }}.{{ headscale.domain }}"
