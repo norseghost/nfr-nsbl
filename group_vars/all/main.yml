@@ -8,3 +8,7 @@ user:
 
 dns:
   domain: andersens.xyz
+acme:
+  account_key_src: "/etc/ssl/acme/account.key"
+  email: "{{ user.email }}"
+  directory: "https://acme-v02.api.letsencrypt.org/directory"

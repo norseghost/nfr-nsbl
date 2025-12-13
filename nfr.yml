@@ -11,7 +11,7 @@
 - name: Common setup
   hosts: vps
   roles:
-    - harden
+     - acme
 
 - name: Backup server
   hosts: backup
