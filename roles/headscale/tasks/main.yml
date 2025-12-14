@@ -26,6 +26,7 @@
 
 - name: Start ACME order (DNS-01 challenge)
   community.crypto.acme_certificate:
+    modify_account: false
     terms_agreed: true
     account_key_src: "{{ acme.account_key_src }}"
     acme_directory: "{{ headscale.acme.directory }}"
@@ -37,20 +38,41 @@
     dest: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.pem"
   register: acme_start
 
-- name: Create Cloudflare TXT record for ACME DNS-01 challenge
-  community.general.cloudflare_dns:
-    zone: "{{ headscale.domain }}"
-    record: "_acme-challenge.{{ headscale_fqdn }}"
-    type: TXT
-    value: "{{ acme_start.challenge_data[headscale_fqdn]['dns-01'].resource_value }}"
-    ttl: 60
-    api_token: "{{ cloudflare.api_token }}"
-    solo: true
-  register: cf_txt
+- name: Determine whether DNS-01 work is required
+  ansible.builtin.set_fact:
+    acme_dns_required: >-
+      {{
+        acme_start.changed and
+        (
+          acme_start.authorizations[headscale_fqdn].status != 'valid'
+        )
+      }}
 
-- name: Wait for TXT record to propagate
-  pause:
-    seconds: 30
+- block:
+  - name: Create Cloudflare TXT record for ACME DNS-01 challenge
+    community.general.cloudflare_dns:
+      zone: "{{ headscale.domain }}"
+      record: "_acme-challenge.{{ headscale_fqdn }}"
+      type: TXT
+      value: "{{ acme_start.challenge_data[headscale_fqdn]['dns-01'].resource_value }}"
+      ttl: 60
+      api_token: "{{ cloudflare.api_token }}"
+      solo: true
+    register: cf_txt
+
+  - name: Wait for TXT record to propagate
+    pause:
+      seconds: 30
+
+  when: acme_dns_required
+
+- name: Determine whether certificate finalization is required
+  ansible.builtin.set_fact:
+    acme_finalize_required: >-
+      {{
+        acme_dns_required or
+        acme_start.cert_days | int < 30
+      }}
 
 - name: Finalize ACME order (issue certificate)
   community.crypto.acme_certificate:
@@ -67,3 +89,6 @@
     dest: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.pem"
     remaining_days: 30
   register: acme_finalize
+  when: acme_finalize_required
+
+

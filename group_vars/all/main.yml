@@ -12,3 +12,6 @@ acme:
   account_key_src: "/etc/ssl/acme/account.key"
   email: "{{ user.email }}"
   directory: "https://acme-v02.api.letsencrypt.org/directory"
+  client_dir: /opt/acme.sh
+  renew_cron_hour: 3
+  renew_cron_minute: 17
