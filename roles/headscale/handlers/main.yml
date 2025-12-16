@@ -1,0 +1,7 @@
+- name: Restart headscale
+  ansible.builtin.systemd:
+    name: headscale
+    state: restarted
+  when:
+    - "'headscale.service' in ansible_facts.services"
+    - ansible_facts.services['headscale.service'].state == 'running'

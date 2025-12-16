@@ -1,0 +1,18 @@
+---
+headscale_arch_map:
+  x86_64: amd64
+  aarch64: arm64
+headscale_repo_base: https://github.com/juanfont/headscale/releases/download
+headscale_version: latest            # "latest" or semver like "0.25.1"
+
+
+headscale_fqdn: "{{ headscale.subdomain }}.{{ headscale.domain }}"
+
+# TODO: if these are to be very useful to change, paths in systemd must
+#       also change
+headscale_user: headscale
+headscale_group: headscale
+headscale_lib_dir: /var/lib/headscale
+headscale_le_cache_dir: "{{ headscale_lib_dir}}/cache"
+headscale_run_dir: /run/headscale
+headscale_config_dir: /etc/headscale

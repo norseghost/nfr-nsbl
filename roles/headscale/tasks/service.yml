@@ -1,0 +1,23 @@
+- name: Enable and start headscale
+  ansible.builtin.systemd:
+    name: headscale
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  register: headscale_service
+
+- name: Fail if headscale failed to start
+  ansible.builtin.fail:
+    msg: "Headscale failed to start"
+  when: headscale_service.failed
+
+- name: Verify headscale returns valid cert
+  ansible.builtin.uri:
+    url: "https://{{ headscale_fqdn }}:{{ headscale.listen.port }}"
+    validate_certs: true
+    return_content: false
+    status_code: [200, 301, 302, 400, 401, 403, 404]
+  register: headscale_https
+  retries: 10
+  delay: 3
+  until: headscale_https is succeeded

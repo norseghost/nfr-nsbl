@@ -1,0 +1,23 @@
+---
+- name: Allow required Headscale ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "{{ headscale.derp.port }}",  proto: "udp" }   # DERP
+    - { port: "{{ headscale.grpc.port }}", proto: "tcp" }   # gRPC
+    - { port: "80",    proto: "tcp" }   # HTTP (ACME)
+    - { port: "{{ headscale.listen.port }}",   proto: "tcp" }   # HTTPS
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+- name: Ensure DNS record for {{ headscale_fqdn }}
+  community.general.cloudflare_dns:
+    zone: "{{ headscale.domain }}"
+    record: "{{ headscale.subdomain }}"
+    type: A
+    value: "{{ ipv4_addr }}"
+    api_token: "{{ cloudflare.api_token }}"

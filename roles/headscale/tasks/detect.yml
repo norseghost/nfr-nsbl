@@ -1,0 +1,21 @@
+---
+
+- name: Map system architecture
+  ansible.builtin.set_fact:
+    headscale_arch: "{{ headscale_arch_map[ansible_architecture] }}"
+
+- name: Check if headscale is installed
+  ansible.builtin.command: headscale version
+  register: headscale_installed
+  changed_when: false
+  failed_when: false
+
+- name: Parse installed version
+  ansible.builtin.set_fact:
+    headscale_installed_version: "{{ headscale_installed.stdout | regex_search('v?([0-9.]+)', '\\1') | first }}"
+  when: headscale_installed.rc == 0
+
+- name: Ensure installed version fact exists
+  ansible.builtin.set_fact:
+    headscale_installed_version: ""
+  when: headscale_installed.rc != 0

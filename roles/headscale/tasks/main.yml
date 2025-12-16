@@ -1,94 +1,15 @@
 ---
-- name: Ensure DNS record for {{ headscale_fqdn }}
-  community.general.cloudflare_dns:
-    zone: "{{ headscale.domain }}"
-    record: "{{ headscale.subdomain }}"
-    type: A
-    value: "{{ ipv4_addr }}"
-    api_token: "{{ cloudflare.api_token }}"
-
-- name: Create headscale certificate directory
-  ansible.builtin.file:
-    path: "{{ headscale.acme.cert_dir }}"
-    state: directory
-    mode: "0750"
-
-- name: Generate private key for letsencrypt certificate generation
-  community.crypto.openssl_privatekey:
-    path: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.key"
-    size: 4096
-
-- name: Create CSR for headscale
-  community.crypto.openssl_csr:
-    path: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.csr"
-    privatekey_path: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.key"
-    common_name: "{{ headscale_fqdn }}"
-
-- name: Start ACME order (DNS-01 challenge)
-  community.crypto.acme_certificate:
-    modify_account: false
-    terms_agreed: true
-    account_key_src: "{{ acme.account_key_src }}"
-    acme_directory: "{{ headscale.acme.directory }}"
-    acme_version: 2
-    account_email: "{{ headscale.acme.email }}"
-    challenge: dns-01
-    csr: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.csr"
-    remaining_days: 9999
-    dest: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.pem"
-  register: acme_start
-
-- name: Determine whether DNS-01 work is required
-  ansible.builtin.set_fact:
-    acme_dns_required: >-
-      {{
-        acme_start.changed and
-        (
-          acme_start.authorizations[headscale_fqdn].status != 'valid'
-        )
-      }}
-
-- block:
-  - name: Create Cloudflare TXT record for ACME DNS-01 challenge
-    community.general.cloudflare_dns:
-      zone: "{{ headscale.domain }}"
-      record: "_acme-challenge.{{ headscale_fqdn }}"
-      type: TXT
-      value: "{{ acme_start.challenge_data[headscale_fqdn]['dns-01'].resource_value }}"
-      ttl: 60
-      api_token: "{{ cloudflare.api_token }}"
-      solo: true
-    register: cf_txt
-
-  - name: Wait for TXT record to propagate
-    pause:
-      seconds: 30
-
-  when: acme_dns_required
-
-- name: Determine whether certificate finalization is required
-  ansible.builtin.set_fact:
-    acme_finalize_required: >-
-      {{
-        acme_dns_required or
-        acme_start.cert_days | int < 30
-      }}
-
-- name: Finalize ACME order (issue certificate)
-  community.crypto.acme_certificate:
-    terms_agreed: true
-    acme_directory: "{{ headscale.acme.directory }}"
-    acme_version: 2
-    account_email: "{{ headscale.acme.email}}"
-    account_key_src: "{{ acme.account_key_src }}"
-    challenge: dns-01
-    data: "{{ acme_start }}"
-    csr: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.csr"
-    fullchain_dest: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.crt"
-    chain_dest: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}-chain.crt"
-    dest: "{{ headscale.acme.cert_dir }}/{{ headscale_fqdn }}.pem"
-    remaining_days: 30
-  register: acme_finalize
-  when: acme_finalize_required
-
-
+- name: ++ detect headscale version ++
+  ansible.builtin.import_tasks: detect.yml
+- name: ++ dowload headscale if required ++
+  ansible.builtin.import_tasks: download.yml
+- name: ++ install headscale if required ++
+  ansible.builtin.import_tasks: install.yml
+- name: ++ set up headscale networking ++
+  ansible.builtin.import_tasks: network.yml
+- name: ++ configure headscale ++
+  ansible.builtin.import_tasks: config.yml
+- name: ++ enable headscale service ++
+  ansible.builtin.import_tasks: service.yml
+- name: generate headscale api key
+  ansible.builtin.import_tasks: apikey.yml

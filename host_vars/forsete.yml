@@ -3,7 +3,33 @@ headscale:
   domain: "{{ dns.domain }}"
   subdomain: bifrost
   acme:
-    cert_dir: "/etc/headscale/certs"
     email: "{{ acme.email }}"
-    directory: "{{ acme.directory }}"
-headscale_fqdn: "{{ headscale.subdomain }}.{{ headscale.domain }}"
+    url: "{{ acme.directory }}"
+  dns:
+    base_domain: bi.fr0.st
+    magic: true
+    override_local: true
+    nameservers:
+      global:
+        - 1.1.1.1
+  database:
+    type: sqlite
+    sqlite:
+      write_ahead_log: true
+  prefixes:
+    v4: 100.64.0.0/10
+  log:
+    # Output formatting for logs: text or json
+    format: text
+    level: info
+  listen:
+    port: 443
+    addr: 0.0.0.0
+  grpc:
+    port: 50443
+    addr: 0.0.0.0
+  derp:
+    enabled: false
+    port: 3478
+    urls:
+      - https://controlplane.tailscale.com/derpmap/default

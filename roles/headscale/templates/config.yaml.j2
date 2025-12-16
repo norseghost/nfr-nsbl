@@ -1,0 +1,61 @@
+server_url: "https://{{ headscale_fqdn }}:{{ headscale.listen.port }}"
+listen_addr: "{{ headscale.listen.addr }}:{{ headscale.listen.port }}"
+grpc_listen_addr: "{{ headscale.grpc.addr }}:{{ headscale.grpc.port }}"
+
+database:
+  type: {{ headscale.database.type }}
+{% if headscale.database.type == "sqlite" %}
+  sqlite:
+    path: "{{ headscale_lib_dir}}/db.sqlite"
+    write_ahead_log: {{ headscale.database.sqlite.write_ahead_log | bool }}
+{% endif %}
+
+prefixes:
+  v4: {{ headscale.prefixes.v4 }}
+
+log:
+  format: {{ headscale.log.format }}
+  level: {{ headscale.log.level }}
+
+acme_email: "{{ headscale.acme.email }}"
+acme_url: "{{ headscale.acme.url }}"
+# tls
+tls_letsencrypt_hostname: "{{ headscale_fqdn }}"
+tls_letsencrypt_cache_dir: "{{ headscale_le_cache_dir}}"
+noise:
+  # The Noise private key is used to encrypt the traffic between headscale and
+  # Tailscale clients when using the new Noise-based protocol. A missing key
+  # will be automatically generated.
+  private_key_path: "{{ headscale_lib_dir}}/noise_private.key"
+{% if headscale.dns.magic or headscale.dns.override_local %}
+dns:
+  override_local_dns: {{ headscale.dns.override_local | bool }}
+  magic_dns: {{ headscale.dns.magic | bool }}
+  base_domain: {{ headscale.dns.base_domain }}
+  nameservers:
+    global:
+{% for ns in headscale.dns.nameservers.global %}
+      - {{ ns }}
+{% endfor %}
+{% endif %}
+
+{% if headscale.derp.enabled %}
+derp:
+  server:
+    enabled: true
+    region_id: 999
+    region_code: hs
+    region_name: headscale
+    stun_listen_addr: "0.0.0.0:{{ headscale.derp.port }}"
+  urls:
+{% for url in headscale.derp.urls %}
+    - {{ url }}
+{% endfor %}
+{% else %}
+derp:
+  urls:
+{% for url in headscale.derp.urls %}
+    - {{ url }}
+{% endfor %}
+{% endif %}
+
