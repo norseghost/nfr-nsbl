@@ -1,0 +1,48 @@
+---
+- name: Read vault file header
+  delegate_to: localhost
+  become: false
+  ansible.builtin.command:
+    cmd: head -n 1 {{ vault_file }}
+  register: vault_header
+  changed_when: false
+  failed_when:
+    - vault_header.rc != 0
+    - vault_header.stdout is not search('ANSIBLE_VAULT')
+
+- name: Decrypt vault file to temp file
+  delegate_to: localhost
+  become: false
+  no_log: true
+  ansible.builtin.command:
+    cmd: >
+      ansible-vault decrypt
+      --output {{ vault_temp_file }}
+      {{ vault_file }}
+
+- name: Ensure key exists in decrypted vault
+  delegate_to: localhost
+  become: false
+  no_log: true
+  ansible.builtin.lineinfile:
+    path: "{{ vault_temp_file }}"
+    regexp: "^{{ vault_key }}:"
+    line: '{{ vault_key }}: "{{ vault_value }}"'
+    state: present
+
+- name: Re-encrypt vault file
+  delegate_to: localhost
+  become: false
+  no_log: true
+  ansible.builtin.command:
+    cmd: >
+      ansible-vault encrypt
+      --output {{ vault_file }}
+      {{ vault_temp_file }}
+
+- name: Remove decrypted temp file
+  delegate_to: localhost
+  become: false
+  ansible.builtin.file:
+    path: "{{ vault_temp_file }}"
+    state: absent

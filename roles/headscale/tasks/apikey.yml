@@ -1,67 +1,24 @@
 ---
 - block:
 
-    - name: Read secrets.yml header
-      delegate_to: localhost
-      become: false
-      ansible.builtin.command:
-        cmd: head -n 1 group_vars/all/secrets.yml
-      register: secrets_header
-      changed_when: false
-      failed_when:
-        - secrets_header.rc != 0
-        - secrets_header.stdout is not search('ANSIBLE_VAULT')
-
-    - name: Decrypt secrets.yml to temp file
-      delegate_to: localhost
-      become: false
-      no_log: true
-      ansible.builtin.command:
-        cmd: >
-          ansible-vault decrypt
-          --vault-password-file secrets/password_file
-          --output /tmp/secrets.yml.dec
-          group_vars/all/secrets.yml
-
     - name: Generate headscale API key
       ansible.builtin.command:
         cmd: headscale apikey create
       register: headscale_api_key_cmd
       changed_when: true
 
-    - name: Capture generated API key
+    - name: Capture headscale API key
       ansible.builtin.set_fact:
         _headscale_new_api_key: "{{ headscale_api_key_cmd.stdout | trim }}"
       no_log: true
 
-    - name: Add headscale_api_key to decrypted secrets
-      delegate_to: localhost
-      become: false
-      no_log: true
-      ansible.builtin.lineinfile:
-        path: /tmp/secrets.yml.dec
-        line: 'headscale_api_key: "{{ _headscale_new_api_key }}"'
-        state: present
-
-    - name: Re-encrypt secrets.yml
-      delegate_to: localhost
-      become: false
-      no_log: true
-      ansible.builtin.command:
-        cmd: >
-          ansible-vault encrypt
-          --vault-password-file secrets/password_file
-          --encrypt-vault-id=default
-          --output group_vars/all/secrets.yml
-          /tmp/secrets.yml.dec
-
-  always:
-    - name: Remove decrypted temp file
-      delegate_to: localhost
-      become: false
-      ansible.builtin.file:
-        path: /tmp/secrets.yml.dec
-        state: absent
+    - name: Store headscale API key in vault
+      include_role:
+        name: vault_kv_set
+      vars:
+        vault_file: group_vars/all/secrets.yml
+        vault_key: headscale_api_key
+        vault_value: "{{ _headscale_new_api_key }}"
 
   when:
     - headscale_api_key is not defined
