@@ -1,0 +1,59 @@
+---
+- name: Ensure installation dependencies
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - debian-keyring
+      - debian-archive-keyring
+      - apt-transport-https
+    state: present
+
+- name: Add Cloudsmith repository
+  ansible.builtin.apt_key:
+    url: "https://dl.cloudsmith.io/public/caddy/stable/gpg.key"
+    state: present
+
+- name: Add Caddy repository to sources list
+  ansible.builtin.apt_repository:
+    repo:
+      "deb https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    state: present
+    filename: caddy-stable
+
+- name: Add Caddy src repository to sources list
+  ansible.builtin.apt_repository:
+    repo:
+      "deb-src https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    state: present
+    filename: caddy-stable
+
+- name: Install Caddy
+  ansible.builtin.apt:
+    update_cache: true
+    name: caddy
+    state: present
+
+- name: Ensure Caddy configuration directory exists
+  ansible.builtin.file:
+    path: /etc/caddy
+    state: directory
+    mode: '0755'
+    owner: caddy
+    group: caddy
+
+- name: Setup main Caddyfile with import directive
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: /etc/caddy/Caddyfile
+    owner: caddy
+    group: caddy
+    mode: '0644'
+    # This validates the config before overwriting the old one
+    validate: caddy validate --adapter caddyfile --config %s
+  notify: Reload Caddy
+
+- name: Enable and start Caddy service
+  ansible.builtin.service:
+    name: caddy
+    enabled: true
+    state: started

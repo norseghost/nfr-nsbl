@@ -10,7 +10,7 @@
 - name: Common setup
   hosts: vps
   roles:
-     - acme
+    - caddy
 
 - name: Backup server
   hosts: backup
