@@ -3,10 +3,7 @@ headscale_arch_map:
   x86_64: amd64
   aarch64: arm64
 headscale_repo_base: https://github.com/juanfont/headscale/releases/download
-headscale_version: latest            # "latest" or semver like "0.25.1"
-
-
-headscale_fqdn: "{{ headscale.subdomain }}.{{ headscale.domain }}"
+headscale_version: latest
 
 # TODO: if these are to be very useful to change, paths in systemd must
 #       also change

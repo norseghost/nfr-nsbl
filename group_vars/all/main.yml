@@ -15,3 +15,7 @@ acme:
   client_dir: /opt/acme.sh
   renew_cron_hour: 3
   renew_cron_minute: 17
+headscale_domain: "{{ dns.domain }}"
+headscale_subdomain: bifrost
+headscale_fqdn: "{{ headscale_subdomain }}.{{ headscale_domain }}"
+headscale_url: "https://{{ headscale_fqdn }}"

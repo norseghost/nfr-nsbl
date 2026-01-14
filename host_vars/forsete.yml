@@ -23,7 +23,7 @@ headscale:
     format: text
     level: info
   listen:
-    port: 443
+    port: 4346
     addr: 0.0.0.0
   grpc:
     port: 50443
