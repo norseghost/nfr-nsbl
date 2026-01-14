@@ -1,19 +1,4 @@
 ---
-- name: Allow required Headscale ports
-  community.general.ufw:
-    rule: allow
-    port: "{{ item.port }}"
-    proto: "{{ item.proto }}"
-  loop:
-    - { port: "{{ headscale.derp.port }}", proto: "udp" }   # DERP
-    - { port: "{{ headscale.grpc.port }}", proto: "tcp" }   # gRPC
-    - { port: "80", proto: "tcp" }   # HTTP (ACME)
-    - { port: "{{ headscale.listen.port }}", proto: "tcp" }   # HTTPS
-
-- name: Enable UFW
-  community.general.ufw:
-    state: enabled
-
 - name: Ensure DNS record for {{ headscale_fqdn }}
   community.general.cloudflare_dns:
     zone: "{{ headscale.domain }}"
@@ -21,3 +6,17 @@
     type: A
     value: "{{ ipv4_addr }}"
     api_token: "{{ cloudflare.api_token }}"
+
+- name: Ensure Caddy conf.d directory exists
+  file:
+    path: /etc/caddy/conf.d
+    state: directory
+    owner: caddy
+    group: caddy
+    mode: '0755'
+
+- name: Deploy Caddy service configuration
+  template:
+    src: headscale.caddy.j2
+    dest: "/etc/caddy/conf.d/headscale.caddy"
+  notify: "reload caddy"

@@ -1,0 +1,28 @@
+# Headscale Reverse Proxy Configuration
+{{ headscale_fqdn }} {
+    # Logging for this specific service
+    log {
+        output file /var/log/caddy/{{ headscale.subdomain }}.log
+    }
+
+    # Headscale uses WebSockets and long-lived connections for the control plane
+    handle {
+        reverse_proxy localhost:{{ headscale.listen.port }} {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # gRPC
+    # uses h2c (HTTP/2 Cleartext) because Caddy handles the TLS at the edge and
+    # talks to Headscale unencrypted over the local loopbackh
+    handle /headscale.v1.* {
+        reverse_proxy localhost:{{ headscale.grpc.port }} {
+            transport http {
+                versions h2c
+            }
+        }
+    }
+}

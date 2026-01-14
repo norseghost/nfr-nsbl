@@ -41,6 +41,19 @@
     owner: caddy
     group: caddy
 
+- name: Allow required Caddy ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: "80", proto: "tcp" }
+    - { port: "443", proto: "tcp" }
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
 - name: Setup main Caddyfile with import directive
   ansible.builtin.template:
     src: Caddyfile.j2
@@ -50,7 +63,7 @@
     mode: '0644'
     # This validates the config before overwriting the old one
     validate: caddy validate --adapter caddyfile --config %s
-  notify: Reload Caddy
+  notify: "reload caddy"
 
 - name: Enable and start Caddy service
   ansible.builtin.service:

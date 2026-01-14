@@ -20,8 +20,8 @@ log:
 acme_email: "{{ headscale.acme.email }}"
 acme_url: "{{ headscale.acme.url }}"
 # tls
-tls_letsencrypt_hostname: "{{ headscale_fqdn }}"
-tls_letsencrypt_cache_dir: "{{ headscale_le_cache_dir}}"
+tls_letsencrypt_hostname: ""
+tls_letsencrypt_cache_dir: ""
 noise:
   # The Noise private key is used to encrypt the traffic between headscale and
   # Tailscale clients when using the new Noise-based protocol. A missing key
@@ -58,4 +58,3 @@ derp:
     - {{ url }}
 {% endfor %}
 {% endif %}
-

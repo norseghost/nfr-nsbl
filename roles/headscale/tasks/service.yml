@@ -6,17 +6,22 @@
     daemon_reload: true
   register: headscale_service
 
+- name: Force Caddy reload now
+  ansible.builtin.meta: flush_handlers
+
 - name: Fail if headscale failed to start
   ansible.builtin.fail:
     msg: "Headscale failed to start"
   when: headscale_service.failed
 
-- name: Verify headscale returns valid cert
+- name: Verify headscale is reachable via Caddy
   ansible.builtin.uri:
-    url: "https://{{ headscale_fqdn }}:{{ headscale.listen.port }}"
+    # Use the FQDN on standard HTTPS port (443) to check the cert Caddy is serving
+    url: "https://{{ headscale_fqdn }}"
     validate_certs: true
     return_content: false
-    status_code: [200, 301, 302, 400, 401, 403, 404]
+    # Headscale may return 200 (if web UI) or 404 (if no index), both prove Caddy is working
+    status_code: [200, 404]
   register: headscale_https
   retries: 10
   delay: 3
