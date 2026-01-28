@@ -10,7 +10,7 @@
   ansible.builtin.user:
     name: "{{ user.name }}"
     group: "{{ user.group }}"
-    password: "{{ user.password }}"
+    password: "{{ user_secrets.password }}"
     update_password: on_create
     uid: "{{ user.uid }}"
     groups: sudo
@@ -46,3 +46,18 @@
     user: "{{ user.name }}"
   tags:
     - ssh
+
+- name: install ufw
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: true
+
+- name: allow ssh through ufw
+  community.general.ufw:
+    rule: allow
+    port: 22
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
