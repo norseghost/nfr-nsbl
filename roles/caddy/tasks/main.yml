@@ -6,6 +6,7 @@
       - debian-keyring
       - debian-archive-keyring
       - apt-transport-https
+      - ufw
     state: present
 
 - name: Add Cloudsmith repository
