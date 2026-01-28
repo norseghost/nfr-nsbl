@@ -20,6 +20,16 @@
     path: /usr/bin/headscale
   register: headscale_bin
 
+- name: Configure Headscale ACL for bidirectional subnet routing
+  ansible.builtin.template:
+    src: acl.json.j2
+    dest: "{{ headscale_config_dir }}/acl.json"
+    owner: "{{ headscale_user }}"
+    group: "{{ headscale_group }}"
+    mode: '0644'
+  notify: Restart headscale
+  when: headscale_bin.stat.exists
+
 - name: Install config.yaml
   ansible.builtin.template:
     src: config.yaml.j2

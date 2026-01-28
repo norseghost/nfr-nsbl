@@ -11,5 +11,7 @@
   ansible.builtin.import_tasks: config.yml
 - name: ++ enable headscale service ++
   ansible.builtin.import_tasks: service.yml
-- name: generate headscale api key
+- name: ++ generate headscale api key ++
   ansible.builtin.import_tasks: apikey.yml
+- name: ++ set up users ++
+  ansible.builtin.import_tasks: users.yml

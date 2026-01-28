@@ -1,7 +1,8 @@
-server_url: "https://{{ headscale_fqdn }}:{{ headscale.listen.port }}"
+server_url: "https://{{ headscale_fqdn }}"
 listen_addr: "{{ headscale.listen.addr }}:{{ headscale.listen.port }}"
 grpc_listen_addr: "{{ headscale.grpc.addr }}:{{ headscale.grpc.port }}"
-
+policy:
+  path: {{ headscale_config_dir }}/acl.json
 database:
   type: {{ headscale.database.type }}
 {% if headscale.database.type == "sqlite" %}

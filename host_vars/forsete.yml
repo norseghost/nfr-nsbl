@@ -6,12 +6,14 @@ headscale:
     email: "{{ acme.email }}"
     url: "{{ acme.directory }}"
   dns:
-    base_domain: bi.fr0.st
+    base_domain: ts.h0g.in
     magic: true
     override_local: true
     nameservers:
       global:
+        - 10.10.0.1
         - 1.1.1.1
+        - 8.8.8.8
   database:
     type: sqlite
     sqlite:

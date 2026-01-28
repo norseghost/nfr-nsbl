@@ -19,3 +19,9 @@ headscale_domain: "{{ dns.domain }}"
 headscale_subdomain: bifrost
 headscale_fqdn: "{{ headscale_subdomain }}.{{ headscale_domain }}"
 headscale_url: "https://{{ headscale_fqdn }}"
+headscale_users:
+  - norseghost
+  - heimdall
+tailscale_user: heimdall
+lan_cidr: 10.10.0.0/16
+tailnet_cidr: 100.64.0.0/10

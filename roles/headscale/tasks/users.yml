@@ -1,0 +1,13 @@
+---
+- name: Ensure Headscale users exist
+  ansible.builtin.command:
+    cmd: "headscale user create {{ item }}"
+  register: user_creation
+  # Headscale returns an error if the user exists; we ignore that specific error
+  failed_when:
+    - user_creation.rc != 0
+    - "'UNIQUE constraint failed' not in user_creation.stderr"
+  # Only report a "change" in Ansible if the command actually created a new user
+  changed_when:
+    - user_creation.rc == 0
+  loop: "{{ headscale_users}}"

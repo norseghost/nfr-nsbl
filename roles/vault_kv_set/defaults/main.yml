@@ -1,0 +1,5 @@
+---
+vault_file: group_vars/all/secrets.yml
+vault_key: changeme
+vault_value: changeme
+vault_temp_file: /tmp/vault_edit.yml.dec
