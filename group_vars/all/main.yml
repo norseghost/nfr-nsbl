@@ -5,7 +5,8 @@ user:
   shell: /usr/bin/zsh
   email: martin.andreas.andersen@gmail.com
   pubkey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG3mZSaRskxRMZmjYmAVMljWAWyR5an9bTrxtBGPSKK4
-
+ansible_password: "{{ pw[inventory_hostname] | default(omit) }}"
+ansible_public_key: "{{ user.pubkey }}"
 dns:
   domain: andersens.xyz
 acme:
