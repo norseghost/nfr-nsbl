@@ -1,0 +1,7 @@
+---
+unraid_flash_src: /boot
+unraid_flash_dest: /mnt/sysdata/backups/mimer/flash
+unraid_flash_snapdir: /mnt/sysdata/.snapshots
+unraid_flash_scriptdir: /mnt/user/appdata/backup_flash
+unraid_flash_snapkeep: 10
+unraid_flash_schedule: "15 3 * * *"

@@ -1,0 +1,57 @@
+---
+- name: Ensure directory
+  ansible.builtin.file:
+    path: "{{ unraid_flash_scriptdir }}"
+    state: directory
+    owner: "99"
+    group: "100"
+    mode: "0750"
+
+- name: copy flash backup script
+  ansible.builtin.template:
+    src: backup_flash.sh.j2
+    dest: "{{ unraid_flash_scriptdir }}/backup_flash.sh"
+    owner: "99"
+    group: "100"
+    mode: "0750"
+
+
+- name: Ensure backup cron job is installed via go
+  ansible.builtin.lineinfile:
+    path: /boot/config/go
+    insertafter: EOF
+    line: |
+      echo "{{ unraid_flash_schedule }} {{ unraid_flash_scriptdir }}/backup_flash.sh" | /etc/cron.d/backup_flash
+    state: present
+- name: Install backup_flash cron job (runtime)
+  ansible.builtin.copy:
+    dest: /etc/cron.d/backup_flash
+    content: |
+      {{ unraid_flash_schedule }} {{ unraid_flash_scriptdir }}/backup_flash.sh
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure flash backup parent directory exists
+  ansible.builtin.file:
+    path: "{{ unraid_flash_dest | dirname }}"
+    state: directory
+    mode: "0755"
+- name: Check if paths are btrfs subvolumes
+  ansible.builtin.command: >
+    btrfs subvolume show {{ item }}
+  loop:
+    - "{{ unraid_flash_snapdir }}"
+    - "{{ unraid_flash_dest }}"
+  register: subvol_checks
+  failed_when: false
+  changed_when: false
+
+- name: Create missing btrfs subvolumes
+  ansible.builtin.command: >
+    btrfs subvolume create {{ item.item }}
+  loop: "{{ subvol_checks.results }}"
+  when: item.rc != 0
+
+# TODO: move the above to a different file
+# TODO: add ssh keys at least

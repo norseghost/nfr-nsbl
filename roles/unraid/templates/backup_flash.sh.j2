@@ -1,0 +1,46 @@
+#!/bin/bash
+set -euo pipefail
+log() {
+  logger -t flash-backup "$1"
+}
+# ---- CONFIG ----
+SRC="/boot"
+DEST="{{ unraid_flash_dest }}"
+SNAP_DIR="{{ unraid_flash_snapdir }}"
+KEEP={{ unraid_flash_snapkeep | int }}
+
+DATE="$(date +%F_%H-%M-%S)"
+SNAP="${SNAP_DIR}/flash-${DATE}"
+# Ensure DEST is a subvolume (Required for btrfs snapshot)
+if ! btrfs subvolume show "$DEST" >/dev/null 2>&1; then
+    log "Error: $DEST is not a btrfs subvolume. Snapshotting will fail."
+    exit 1
+fi
+
+# ---- CHANGE DETECTION ----
+# We check if rsync would actually move data.
+# 'f' in itemize-changes denotes a regular file.
+CHANGES=$(rsync -rlptgoDnc --itemize-changes --delete "$SRC/" "$DEST/" | grep -E '^([<>+ck]|[*][^ ])' | wc -l)
+
+if [ "$CHANGES" -eq 0 ]; then
+  log "Check complete: No changes found in $SRC. Skipping backup."
+  exit 0
+else
+  log "Check complete: $CHANGES changes detected. Proceeding with snapshot and sync."
+fi
+
+# Create snapshot of the PREVIOUS state before overwriting
+btrfs subvolume snapshot -r "$DEST" "$SNAP"
+log "Snapshot created: $SNAP"
+
+# ---- OVERWRITE COPY ----
+# Removed --no-perms/owner to ensure the backup is a faithful mirror
+rsync -a --delete --exclude='lost+found' "$SRC/" "$DEST/"
+
+# ---- PRUNE OLD SNAPSHOTS ----
+if [[ "$KEEP" -gt 0 ]]; then
+  # Improved pruning: find directories/subvols matching pattern, sort by date, delete oldest
+  ls -1dt "${SNAP_DIR}"/flash-* 2>/dev/null | tail -n +"$((KEEP + 1))" | xargs -I {} -r btrfs subvolume delete "{}"
+fi
+
+log "Backup completed successfully."
