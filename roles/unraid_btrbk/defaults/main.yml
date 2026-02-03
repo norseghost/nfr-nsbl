@@ -1,0 +1,8 @@
+---
+btrbk_install_dir: /mnt/user/appdata/btrbk
+btrbk_cron_schedule: "0 * * * *"
+btrbk_command: "{{ btrbk_install_dir }}/bin/btrbk -c {{ btrbk_install_dir }}/config/btrbk.conf"
+btrbk_remote: ""
+btrbk_remote_path: ""
+
+btrbk_volumes: {}
