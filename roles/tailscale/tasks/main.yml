@@ -25,18 +25,18 @@
 
 - name: Get Tailscale Status
   ansible.builtin.command: tailscale status --json
-  register: ts_status_json
+  register: tailscale_status_json
   changed_when: false
   failed_when: false
 
 - name: Determine if enrollment is needed
   set_fact:
     # Need enrollment if command failed, or state isn't Running, or AuthURL doesn't match
-    needs_enrollment: >-
+    tailscale_needs_enrollment: >-
       {{
-        ts_status_json.rc != 0 or
-        (ts_status_json.stdout | from_json).BackendState != 'Running' or
-        headscale_url not in (ts_status_json.stdout | from_json).AuthURL
+        tailscale_status_json.rc != 0 or
+        (tailscale_status_json.stdout | from_json).BackendState != 'Running' or
+        headscale_url not in (tailscale_status_json.stdout | from_json).AuthURL
       }}
 
 - name: Fetch Headscale User ID for {{ tailscale_user }}
@@ -47,7 +47,7 @@
       Authorization: "Bearer {{ headscale_api_key }}"
   register: user_info
   delegate_to: localhost
-  when: needs_enrollment
+  when: tailscale_needs_enrollment
 
 - name: Generate Tailscale auth key
   ansible.builtin.uri:
@@ -63,7 +63,7 @@
     status_code: 200
   register: headscale_key_response
   delegate_to: localhost
-  when: needs_enrollment
+  when: tailscale_needs_enrollment
   no_log: true
 
 - name: Enroll system into Headscale
@@ -71,10 +71,6 @@
     tailscale up
     --login-server {{ headscale_url }}
     --authkey {{ headscale_key_response.json.preAuthKey.key }}
-    {{ tailscale_extra_args | default('') }}
+    --accept-routes
   when: needs_enrollment
   changed_when: true
-
-- name: Accept routes
-  ansible.builtin.command: >
-    tailscale set --accept-routes

@@ -12,6 +12,6 @@
   register: btrbk_installed
   failed_when: false
 
-- name: Set up btrbk subvolumes
+# - name: Set up btrbk subvolumes
 
-- name: Set up btrbk configuration
+# - name: Set up btrbk configuration

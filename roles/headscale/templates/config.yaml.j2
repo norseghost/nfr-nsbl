@@ -7,7 +7,7 @@ database:
   type: {{ headscale.database.type }}
 {% if headscale.database.type == "sqlite" %}
   sqlite:
-    path: "{{ headscale_lib_dir}}/db.sqlite"
+    path: "{{ headscale_lib_dir }}/db.sqlite"
     write_ahead_log: {{ headscale.database.sqlite.write_ahead_log | bool }}
 {% endif %}
 
@@ -27,7 +27,7 @@ noise:
   # The Noise private key is used to encrypt the traffic between headscale and
   # Tailscale clients when using the new Noise-based protocol. A missing key
   # will be automatically generated.
-  private_key_path: "{{ headscale_lib_dir}}/noise_private.key"
+  private_key_path: "{{ headscale_lib_dir }}/noise_private.key"
 {% if headscale.dns.magic or headscale.dns.override_local %}
 dns:
   override_local_dns: {{ headscale.dns.override_local | bool }}

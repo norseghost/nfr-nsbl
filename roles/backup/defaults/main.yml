@@ -1,8 +1,1 @@
---- 
-snapshot_frequency: "1h"
-incremental: true
-retention:
-  - "1h"
-  - "24h"
-  - "7d"
-  - "1M"
+---

@@ -10,6 +10,6 @@ headscale_version: latest
 headscale_user: headscale
 headscale_group: headscale
 headscale_lib_dir: /var/lib/headscale
-headscale_le_cache_dir: "{{ headscale_lib_dir}}/cache"
+headscale_le_cache_dir: "{{ headscale_lib_dir }}/cache"
 headscale_run_dir: /run/headscale
 headscale_config_dir: /etc/headscale

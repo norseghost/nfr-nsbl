@@ -7,7 +7,7 @@
     group: "100"
     mode: "0750"
 
-- name: copy flash backup script
+- name: Copy flash backup script
   ansible.builtin.template:
     src: backup_flash.sh.j2
     dest: "{{ unraid_flash_scriptdir }}/backup_flash.sh"
@@ -37,20 +37,21 @@
     path: "{{ unraid_flash_dest | dirname }}"
     state: directory
     mode: "0755"
+
 - name: Check if paths are btrfs subvolumes
   ansible.builtin.command: >
     btrfs subvolume show {{ item }}
   loop:
     - "{{ unraid_flash_snapdir }}"
     - "{{ unraid_flash_dest }}"
-  register: subvol_checks
+  register: unraid_flash_backup_subvol_checks
   failed_when: false
   changed_when: false
 
 - name: Create missing btrfs subvolumes
   ansible.builtin.command: >
     btrfs subvolume create {{ item.item }}
-  loop: "{{ subvol_checks.results }}"
+  loop: "{{ unraid_flash_backup_subvol_checks.results }}"
   when: item.rc != 0
 
 # TODO: move the above to a different file

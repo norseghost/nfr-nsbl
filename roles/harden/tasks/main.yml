@@ -53,13 +53,13 @@
   tags:
     - ssh
 
-- name: install ufw
+- name: Install UFW
   ansible.builtin.apt:
     name: ufw
     state: present
     update_cache: true
 
-- name: allow ssh through ufw
+- name: Allow SSH through UFW
   community.general.ufw:
     rule: allow
     port: 22
