@@ -1,0 +1,10 @@
+words = [
+    "ansible",
+    "btrbk",
+    "caddy",
+    "cron",
+    "fqcn",
+    "headscale",
+    "tailscale",
+    "ufw",
+]
