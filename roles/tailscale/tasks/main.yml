@@ -27,16 +27,27 @@
   ansible.builtin.command: tailscale status --json
   register: tailscale_status_json
   changed_when: false
+  # We expect this might fail if tailscaled is brand new
   failed_when: false
+
+- name: Parse Tailscale Status
+  ansible.builtin.set_fact:
+    tailscale_status: "{{ tailscale_status_json.stdout | from_json }}"
+  when: tailscale_status_json.rc == 0
+
+- name: Validate Headscale User exists
+  ansible.builtin.assert:
+    that: "user_info.json.users | length > 0"
+    fail_msg: "User {{ tailscale_user }} was not found in Headscale."
+  when: tailscale_needs_enrollment
 
 - name: Determine if enrollment is needed
   ansible.builtin.set_fact:
-    # Need enrollment if command failed, or state isn't Running, or AuthURL doesn't match
     tailscale_needs_enrollment: >-
       {{
         tailscale_status_json.rc != 0 or
-        (tailscale_status_json.stdout | from_json).BackendState != 'Running' or
-        headscale_url not in (tailscale_status_json.stdout | from_json).AuthURL
+        tailscale_status.BackendState in ['NeedsLogin', 'LoggedOut'] or
+        (tailscale_status.BackendState == 'NoState')
       }}
 
 - name: Fetch Headscale User ID for {{ tailscale_user }}
@@ -72,5 +83,6 @@
     --login-server {{ headscale_url }}
     --authkey {{ headscale_key_response.json.preAuthKey.key }}
     --accept-routes
+    --reset
   when: tailscale_needs_enrollment
   changed_when: true
