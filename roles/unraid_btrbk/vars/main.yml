@@ -8,6 +8,6 @@ unraid_btrbk_volumes:
   backups: /mnt/sysdata/backups
   appdata: /mnt/sysdata/appdata
   vault: /mnt/sysdata/vault
-unraid_btrbk_ssh_identity: "{{ btrbk_install_dir }}/ssh/id_btrbk"
+unraid_btrbk_ssh_identity: "{{ unraid_btrbk_install_dir }}/ssh/id_btrbk"
 unraid_btrbk_ssh_private_key: "{{ ssh.private_key }}"
 unraid_btrbk_ssh_public_key: "{{ user.pubkey }}"
