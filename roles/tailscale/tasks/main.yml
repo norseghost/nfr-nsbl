@@ -35,12 +35,6 @@
     tailscale_status: "{{ tailscale_status_json.stdout | from_json }}"
   when: tailscale_status_json.rc == 0
 
-- name: Validate Headscale User exists
-  ansible.builtin.assert:
-    that: "user_info.json.users | length > 0"
-    fail_msg: "User {{ tailscale_user }} was not found in Headscale."
-  when: tailscale_needs_enrollment
-
 - name: Determine if enrollment is needed
   ansible.builtin.set_fact:
     tailscale_needs_enrollment: >-
@@ -49,6 +43,12 @@
         tailscale_status.BackendState in ['NeedsLogin', 'LoggedOut'] or
         (tailscale_status.BackendState == 'NoState')
       }}
+
+- name: Validate Headscale User exists
+  ansible.builtin.assert:
+    that: "user_info.json.users | length > 0"
+    fail_msg: "User {{ tailscale_user }} was not found in Headscale."
+  when: tailscale_needs_enrollment
 
 - name: Fetch Headscale User ID for {{ tailscale_user }}
   ansible.builtin.uri:
