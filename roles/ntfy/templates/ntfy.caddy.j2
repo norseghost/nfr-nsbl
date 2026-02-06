@@ -1,0 +1,17 @@
+
+# Headscale Reverse Proxy Configuration
+{{ ntfy_url }} {
+    # Logging for this specific service
+    log {
+        output file /var/log/caddy/{{ ntfy_subdomain }}.log
+    }
+    encode gzip zstd
+    handle {
+        reverse_proxy localhost:{{ ntfy_port }} {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

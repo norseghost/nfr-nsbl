@@ -1,0 +1,58 @@
+---
+- name: Set DNS A record for "{{ ntfy_url }}"
+  community.general.cloudflare_dns:
+    zone: "{{ ntfy_domain }}"
+    record: "{{ ntfy_subdomain }}"
+    type: A
+    value: "{{ ipv4_addr }}"
+    api_token: "{{ cloudflare.api_token }}"
+
+- name: Download ntfy GPG key
+  ansible.builtin.get_url:
+    url: "https://archive.ntfy.sh/apt/keyring.gpg"
+    dest: /usr/share/keyrings/ntfy-keyring.gpg
+    mode: '0644'
+
+- name: Add ntfy repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/ntfy-keyring.gpg] https://archive.ntfy.sh/apt stable main"
+    state: present
+
+- name: Ensure directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "ntfy"
+    group: "ntfy"
+    mode: "0750"
+  loop: "{{ ntfy_dirs }}"
+
+- name: Install ntfy package
+  ansible.builtin.apt:
+    name: ntfy
+    state: present
+    update_cache: true
+
+- name: Start and enable ntfy service
+  ansible.builtin.systemd:
+    name: ntfy
+    state: started
+    enabled: true
+
+- name: Configure ntfy
+  ansible.builtin.template:
+    src: server.yml.j2
+    dest: /etc/ntfy/server.yml
+    owner: ntfy
+    group: ntfy
+    mode: "0644"
+  notify: Restart ntfy
+
+- name: Deploy ntfy Caddy service configuration
+  ansible.builtin.template:
+    src: ntfy.caddy.j2
+    dest: "/etc/caddy/conf.d/ntfy.caddy"
+    owner: caddy
+    group: caddy
+    mode: '0644'
+  notify: "reload caddy"

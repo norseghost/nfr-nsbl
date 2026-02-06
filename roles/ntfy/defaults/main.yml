@@ -1,0 +1,23 @@
+---
+ntfy_domain: h0g.in
+ntfy_subdomain: gjallar
+ntfy_url: "https://{{ ntfy_subdomain }}.{{ ntfy_domain }}"
+ntfy_port: 3435
+ntfy_cache: true
+ntfy_web_email: "martin.andreas.andersen@gmail.com"
+ntfy_web_key: gk7XCbkKmcDFnnwmsMCYDCnOzh5s5qKnY57OdWYdYWE
+ntfy_web_pubkey: BA70znhLnpaxGdiNGIDE829SqKFcPtMnGn6ZTNSAThywAw7AwmOcOuS3SNT2Ahw7jGz9TJh62AasnB8lmxxGKIE
+ntfy_dirs:
+  - /var/cache/ntfy
+  - /etc/ntfy
+  - /etc/ntfy/templates
+  - /var/lib/ntfy
+# generate hash with
+# ansible all -i localhost, -c local -m debug -a "msg={{ 'yourpassword' | password_hash('bcrypt') }}"
+ntfy_users:
+  - username: volund
+    hash: "$2b$12$2LVEDL3IaQV7rVnA0jLWQ.90UgJ8ycY84sJB/LJVGizAmh.HkzgGu"
+    role: admin
+  - username: norseghost
+    hash: "$2b$12$v6FTsViqG7TiDe5lmgzdZO.6onJW5oavjYZ9EXrZ.dKgNmCA4a2uW"
+    role: user
