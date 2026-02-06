@@ -6,19 +6,19 @@
     group: "100"
     mode: "0750"
   loop:
-    - "{{ btrbk_install_dir }}/bin"
-    - "{{ btrbk_install_dir }}/config"
-    - "{{ btrbk_install_dir }}/logs"
+    - "{{ unraid_btrbk_install_dir }}/bin"
+    - "{{ unraid_btrbk_install_dir }}/config"
+    - "{{ unraid_btrbk_install_dir }}/logs"
 
 - name: Download btrbk
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/digint/btrbk/master/btrbk"
-    dest: "{{ btrbk_install_dir }}/bin/btrbk"
+    dest: "{{ unraid_btrbk_install_dir }}/bin/btrbk"
     mode: "0755"
 
 - name: Generate btrbk.conf
   ansible.builtin.template:
-    dest: "{{ btrbk_install_dir }}/config/btrbk.conf"
+    dest: "{{ unraid_btrbk_install_dir }}/config/btrbk.conf"
     owner: "99"
     group: "100"
     mode: "0644"
@@ -26,7 +26,7 @@
 
 - name: Create btrbk SSH directory
   ansible.builtin.file:
-    path: "{{ btrbk_install_dir }}/ssh"
+    path: "{{ unraid_btrbk_install_dir }}/ssh"
     state: directory
     owner: root
     group: root
@@ -34,19 +34,20 @@
 
 - name: Install btrbk SSH private key
   ansible.builtin.copy:
-    content: "{{ btrbk_ssh_private_key }}"
-    dest: "{{ btrbk_ssh_identity }}"
+    content: "{{ unraid_btrbk_ssh_private_key }}"
+    dest: "{{ unraid_btrbk_ssh_identity }}"
     owner: root
     group: root
     mode: "0600"
 
 - name: Install btrbk SSH public key
   ansible.builtin.copy:
-    content: "{{ btrbk_ssh_public_key }}"
-    dest: "{{ btrbk_ssh_identity }}.pub"
+    content: "{{ unraid_btrbk_ssh_public_key }}"
+    dest: "{{ unraid_btrbk_ssh_identity }}.pub"
     owner: root
     group: root
     mode: "0644"
+
 - name: Ensure snapshot directories exist on disk roots
   ansible.builtin.file:
     # This regex extracts /mnt/disk4 or /mnt/sysdata from the path
@@ -55,15 +56,15 @@
     owner: "99"
     group: "100"
     mode: "0750"
-  with_dict: "{{ btrbk_volumes }}"
+  with_dict: "{{ unraid_btrbk_volumes }}"
 
 # - name: Ensure remote btrbk target subvolumes exist
 #   ansible.builtin.command: >
-#     ssh -i {{ btrbk_ssh_identity }}
+#     ssh -i {{ unraid_btrbk_ssh_identity }}
 #     -o StrictHostKeyChecking=accept-new
-#     root@{{ btrbk_remote }}
-#     "btrfs subvolume create {{ btrbk_remote_path }}/{{ item.key }} || true"
-#   loop: "{{ btrbk_volumes | dict2items }}"
+#     root@{{ unraid_btrbk_remote }}
+#     "btrfs subvolume create {{ unraid_btrbk_remote_path }}/{{ item.key }} || true"
+#   loop: "{{ unraid_btrbk_volumes | dict2items }}"
 #   changed_when: false
 
 - name: Ensure btrbk cron job is installed via go
@@ -72,25 +73,25 @@
     insertafter: EOF
     line: |
       # btrbk cron
-      echo "{{ cron_schedule }} {{ btrbk_command }} run" > /etc/cron/btrbk
+      echo "{{ cron_schedule }} {{ unraid_btrbk_command }} run" > /etc/cron/btrbk
     state: present
 
 - name: Install btrbk cron job on running system
   ansible.builtin.copy:
     dest: /etc/cron.d/btrbk
     content: |
-      {{ cron_schedule }} {{ btrbk_command }} run
+      {{ cron_schedule }} {{ unraid_btrbk_command }} run
     owner: root
     group: root
     mode: "0644"
 
 - name: Dry run planned backups
   ansible.builtin.command:
-    cmd: "{{ btrbk_command }} dryrun"
+    cmd: "{{ unraid_btrbk_command }} dryrun"
   check_mode: false
-  register: btrbk_output
+  register: unraid_btrbk_output
   changed_when: false # Prevents the task from reporting "changed" every time
 
 - name: Display btrbk dry run results
   ansible.builtin.debug:
-    var: btrbk_output.stdout_lines
+    var: unraid_btrbk_output.stdout_lines

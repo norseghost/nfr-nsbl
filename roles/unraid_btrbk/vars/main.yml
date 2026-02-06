@@ -1,13 +1,13 @@
 ---
 cron_schedule: "0 * * * *"
-btrbk_remote: kvasir.ts.h0g.in
-btrbk_remote_path: /mnt/botn
+unraid_btrbk_remote: kvasir.ts.h0g.in
+unraid_btrbk_remote_path: /mnt/botn
 # FIXME: role assumes all subvols to be backed up are on a disk under /mnt
-btrbk_volumes:
+unraid_btrbk_volumes:
   photos: /mnt/disk4/photos
   backups: /mnt/sysdata/backups
   appdata: /mnt/sysdata/appdata
   vault: /mnt/sysdata/vault
-btrbk_ssh_identity: "{{ btrbk_install_dir }}/ssh/id_btrbk"
-btrbk_ssh_private_key: "{{ ssh.private_key }}"
-btrbk_ssh_public_key: "{{ user.pubkey }}"
+unraid_btrbk_ssh_identity: "{{ btrbk_install_dir }}/ssh/id_btrbk"
+unraid_btrbk_ssh_private_key: "{{ ssh.private_key }}"
+unraid_btrbk_ssh_public_key: "{{ user.pubkey }}"

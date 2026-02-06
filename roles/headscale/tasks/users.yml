@@ -6,7 +6,7 @@
   # Headscale returns an error if the user exists; we ignore that specific error
   failed_when:
     - headscale_user_creation.rc != 0
-    - "'UNIQUE constraint failed' not in user_creation.stderr"
+    - "'UNIQUE constraint failed' not in headscale_user_creation.stderr"
   changed_when:
-    - user_creation.rc == 0
+    - headscale_user_creation.rc == 0
   loop: "{{ headscale_users }}"

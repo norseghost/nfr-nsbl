@@ -72,5 +72,5 @@
     --login-server {{ headscale_url }}
     --authkey {{ headscale_key_response.json.preAuthKey.key }}
     --accept-routes
-  when: needs_enrollment
+  when: tailscale_needs_enrollment
   changed_when: true

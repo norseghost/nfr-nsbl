@@ -1,19 +1,19 @@
 # Global Settings
 #
-transaction_log            {{ btrbk_install_dir }}/logs/btrbk.log
-lockfile                   {{ btrbk_install_dir }}/btrbk.lock
+transaction_log            {{ unraid_btrbk_install_dir }}/logs/btrbk.log
+lockfile                   {{ unraid_btrbk_install_dir }}/btrbk.lock
 
 # Retention Policy: 24 hourly, 7 daily, 4 weekly, 3 monthly
 snapshot_preserve_min      latest
 snapshot_preserve          24h 7d 4w 3m
 target_preserve_min        latest
 target_preserve            24h 31d 12w 6m
-{% if btrbk_ssh_identity %}
-ssh_identity {{ btrbk_ssh_identity }}
+{% if unraid_btrbk_ssh_identity %}
+ssh_identity {{ unraid_btrbk_ssh_identity }}
 {% endif %}
 # Volume Definitions
 {% set groups = {} %}
-{% for label, path in btrbk_volumes.items() %}
+{% for label, path in unraid_btrbk_volumes.items() %}
 {% set base = path.split('/')[0:3] | join('/') %}
 {% if base not in groups %}
   {% set _ = groups.update({base: []}) %}
@@ -27,6 +27,6 @@ snapshot_dir .snapshots
 {% for sub in subvolumes %}
 subvolume {{ sub.path | replace(base_path + '/', '') }}
   snapshot_name {{ sub.label }}
-  target ssh://{{ btrbk_remote }}{{ btrbk_remote_path }}
+  target ssh://{{ unraid_btrbk_remote }}{{ unraid_btrbk_remote_path }}
 {% endfor %}
 {% endfor %}
