@@ -9,7 +9,6 @@
   ansible.builtin.apt:
     name: btrbk
     state: present
-  register: btrbk_installed
   failed_when: false
 
 # - name: Set up btrbk subvolumes
