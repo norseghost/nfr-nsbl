@@ -30,7 +30,7 @@
   failed_when: false
 
 - name: Determine if enrollment is needed
-  set_fact:
+  ansible.builtin.set_fact:
     # Need enrollment if command failed, or state isn't Running, or AuthURL doesn't match
     tailscale_needs_enrollment: >-
       {{
