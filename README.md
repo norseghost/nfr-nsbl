@@ -5,21 +5,21 @@ Yeah, I still don't like vowels
 Ansible playbooks to set up my local and remote IT infrastructure
 
 - [x] Enroll: onboard new servers, installing ansible ssh key
-- [x] harden:
-    - [x] create user, add to sudo group
-    - [x] copy ssh pubkey
-    - [x] install ufw, let ssh through
+- [x] Harden:
+    - [x] Create user, add to sudo group
+    - [x] Copy ssh public key
+    - [x] Install ufw, let ssh through
 - [x] Caddy reverse proxy
-    - [x] drop in <service>.caddy config set up
+    - [x] Drop in `<service>.caddy` config set up
 - [x] Headscale orchestrator
-   - [x] set up personal and infrastructure users
-   - [x] Headscale api key stored in vault
+   - [x] Set up personal and infrastructure users
+   - [x] Headscale API key stored in vault
    - [x] `headscale.caddy` service description
-   - [x] set a record of service domain on cloudflare
+   - [x] Set a record of service domain on Cloudflare
 - [-] Tailscale clients
-    - [x] enroll new servers
-    - [ ] gracefully handle changed parameters
-    - [ ] new servers with same names as old need to be removed
+    - [x] Enroll new servers
+    - [ ] Gracefully handle changed parameters
+    - [ ] New servers with same names as old need to be removed
 - [ ] Docker host
      -  [ ] Add docker.org repository
      -  [ ] Decide which services are Docker appropriate

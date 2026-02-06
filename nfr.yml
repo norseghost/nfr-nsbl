@@ -10,6 +10,8 @@
 - name: Common setup
   hosts: vps
   roles:
+    - enroll
+    - harden
     - caddy
 
 - name: Backup server
@@ -17,9 +19,25 @@
   roles:
     - backup
 
-- name: Set up server nodes
-  hosts: srv
 - name: Set up headscale orchestrator
   hosts: vpn
+  gather_facts: true
   roles:
     - headscale
+    - ntfy
+
+- name: Set up VPSes
+  hosts: vps
+  roles:
+    - tailscale
+
+- name: Set up UnRAID
+  hosts: nas
+  roles:
+    - unraid
+    - unraid_btrbk
+
+# - name: Set up server nodes
+#   hosts: srv
+#   roles:
+#     - docker

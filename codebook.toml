@@ -1,10 +1,16 @@
 words = [
     "ansible",
     "btrbk",
+    "btrfs",
     "caddy",
+    "cloudflare",
+    "copyparty",
     "cron",
+    "forgejo",
     "fqcn",
     "headscale",
+    "nas",
+    "ntfy",
     "tailscale",
     "ufw",
 ]
