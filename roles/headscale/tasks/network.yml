@@ -4,7 +4,7 @@
     zone: "{{ headscale.domain }}"
     record: "{{ headscale.subdomain }}"
     type: A
-    value: "{{ ipv4_addr }}"
+    value: "{{ headscale.ipv4 }}"
     api_token: "{{ cloudflare.api_token }}"
 
 - name: Ensure Caddy conf.d directory exists

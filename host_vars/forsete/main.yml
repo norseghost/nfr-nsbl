@@ -1,5 +1,6 @@
 ---
 headscale:
+  ipv4: "45.133.117.53"
   domain: "{{ dns.domain }}"
   subdomain: bifrost
   acme:

@@ -3,3 +3,21 @@
     user: root
     state: present
     key: "{{ ansible_public_key }}"
+  become: true
+  vars:
+    # 1. Switch to 'ubuntu' only if it's an OCI host; otherwise stay as 'root'
+    ansible_user: "{{ 'ubuntu' if inventory_hostname in groups['oci'] else 'root' }}"
+
+    # 2. Use vault password ONLY for non-OCI hosts
+    ansible_password: "{{ (inventory_hostname not in groups['oci']) | ternary(pw[inventory_hostname] | default(omit), omit) }}"
+
+    # 3. Ensure we don't try to use a password for OCI's 'ubuntu' user
+    ansible_ssh_pass: "{{ omit if inventory_hostname in groups['oci'] else ansible_password }}"
+
+- name: Remove oci root login restriction
+  ansible.builtin.replace:
+    path: /root/.ssh/authorized_keys
+    regexp: '^no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo .*? && sleep 10" '
+    replace: ''
+  become: trua
+  when: inventory_hostname in groups['oci']

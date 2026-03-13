@@ -18,11 +18,13 @@ Ansible playbooks to set up my local and remote IT infrastructure
    - [x] Set a record of service domain on Cloudflare
 - [-] Tailscale clients
     - [x] Enroll new servers
-    - [ ] Gracefully handle changed parameters
+    - [x] Gracefully handle changed parameter; fs
     - [ ] New servers with same names as old need to be removed
 - [ ] Docker host
-     -  [ ] Add docker.org repository
-     -  [ ] Decide which services are Docker appropriate
+     - [ ] Add docker.org repository
+     - [ ] Decide which services are Docker appropriate
+     - [ ] Long term, decouple Docker orchestration
+     - [ ] Find a Docker orchestration manager
 - [x] UnRAID backups
     - [x] flash backed up daily, if changed
     - [x] Snapshots of selected directories using btrbk

@@ -44,20 +44,20 @@
         (tailscale_status.BackendState == 'NoState')
       }}
 
-- name: Validate Headscale User exists
-  ansible.builtin.assert:
-    that: "user_info.json.users | length > 0"
-    fail_msg: "User {{ tailscale_user }} was not found in Headscale."
-  when: tailscale_needs_enrollment
-
 - name: Fetch Headscale User ID for {{ tailscale_user }}
   ansible.builtin.uri:
     url: "{{ headscale_url }}/api/v1/user?name={{ tailscale_user }}"
     method: GET
     headers:
       Authorization: "Bearer {{ headscale_api_key }}"
-  register: user_info
+  register: tailscale_user_info
   delegate_to: localhost
+  when: tailscale_needs_enrollment
+
+- name: Validate Headscale User exists
+  ansible.builtin.assert:
+    that: "tailscale_user_info.json.users | length > 0"
+    fail_msg: "User {{ tailscale_user }} was not found in Headscale."
   when: tailscale_needs_enrollment
 
 - name: Generate Tailscale auth key
@@ -69,7 +69,7 @@
     body_format: json
     body:
       # Use the integer ID from the previous step, NOT the string name
-      user: "{{ user_info.json.users[0].id | int }}"
+      user: "{{ tailscale_user_info.json.users[0].id | int }}"
       expiration: "{{ '%Y-%m-%dT%H:%M:%SZ' | strftime( (ansible_facts.date_time.epoch | int) + 86400 ) }}"
     status_code: 200
   register: headscale_key_response

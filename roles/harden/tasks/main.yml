@@ -18,7 +18,6 @@
     group: "{{ user.group }}"
     password: "{{ user_secrets.password }}"
     update_password: on_create
-    uid: "{{ user.uid }}"
     groups: sudo
     append: true
   tags:

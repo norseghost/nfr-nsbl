@@ -1,6 +1,7 @@
 ---
 ntfy_domain: h0g.in
 ntfy_subdomain: gjallar
+ntfy_ipv4: "45.133.117.53"
 ntfy_url: "https://{{ ntfy_subdomain }}.{{ ntfy_domain }}"
 ntfy_port: 3435
 ntfy_cache: true
