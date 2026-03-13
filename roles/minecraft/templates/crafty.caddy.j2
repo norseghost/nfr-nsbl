@@ -1,0 +1,16 @@
+# crafty
+{{ minecraft_fqdn }} {
+    # Logging for this specific service
+    log {
+        output file /var/log/caddy/{{ minecraft_sub_domain }}.log
+    }
+    encode gzip zstd
+    handle {
+        reverse_proxy localhost:{{ minecraft_ports.crafty }} {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

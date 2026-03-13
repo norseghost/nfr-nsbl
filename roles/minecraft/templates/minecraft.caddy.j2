@@ -1,0 +1,35 @@
+{{ minecraft_fqdn }} {
+    encode gzip zstd
+
+    # Redirect /files to /files/ for asset consistency
+    redir /files /files/
+
+    # 1. Copyparty Instance
+    handle /files* {
+        reverse_proxy localhost:{{ minecraft_ports.copyparty }} {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # 2. Crafty Controller (Catch-all)
+    handle {
+        reverse_proxy localhost:{{ minecraft_ports.crafty }} {
+            transport http {
+                tls_insecure_skip_verify
+            }
+            # Crafty often requires the Host header to match for its internal routing
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+
+    }
+
+    log {
+        output file /var/log/caddy/{{ minecraft_fqdn }}.log
+    }
+}

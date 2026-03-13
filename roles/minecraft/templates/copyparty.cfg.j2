@@ -1,0 +1,20 @@
+[global]
+  name: Minecraft Server Files
+  xf-proto: X-Forwarded-Proto
+  xf-host: X-Forwarded-Host
+  xff-src: lan
+  rp-loc: /files/
+  rproxy: -1
+  e2dsa
+  http-only
+  stats
+  no-robots
+
+
+[accounts]
+  minecraft: {{ minecraft_files_password }}
+
+[/]
+  {{ minecraft_dirs.crafty }}
+  accs:
+    A: minecraft

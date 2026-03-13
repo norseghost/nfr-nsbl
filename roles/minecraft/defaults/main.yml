@@ -1,0 +1,24 @@
+minecraft_ipv4: 129.151.199.180
+minecraft_root_domain: h0g.in
+minecraft_sub_domain: mc
+minecraft_fqdn: "{{ minecraft_sub_domain }}.{{ minecraft_root_domain }}"
+minecraft_project_vol: minecraft
+minecraft_fsdev: /dev/sdb1
+# TODO: refactor this to
+# - specify whether project root is a subvolume
+# - abstract out the base directory
+minecraft_parent_dir: /srv
+minecraft_base_dir: "{{ minecraft_parent_dir }}/{{ minecraft_project_vol}}"
+minecraft_dirs:
+  crafty: "{{ minecraft_base_dir }}/crafty"
+  gate: "{{ minecraft_base_dir }}/gate"
+  copyparty: "{{ minecraft_base_dir }}/copyparty"
+# server ports cannot conflict with proxy ports
+minecraft_ports:
+  copyparty: 3923
+  crafty: 8443
+  dynmap: 8123
+  gate: 25565
+  bedrock: 19132
+  bedrock_servers: 19133-19140
+  servers: 25566-25600

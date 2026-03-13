@@ -1,0 +1,133 @@
+- name: Configure Cloudflare DNS for Minecraft
+  community.general.cloudflare_dns:
+    zone: "{{ minecraft_root_domain }}"
+    record: "{{ item.record }}"
+    type: "{{ item.type }}"
+    value: "{{ item.value }}"
+    proxied: false
+    api_token: "{{ cloudflare.api_token }}"
+  loop:
+    - { record: "{{ minecraft_sub_domain }}", type: "A", value: "{{ minecraft_ipv4 }}" }
+    - { record: "*.{{ minecraft_sub_domain }}", type: "CNAME", value: "{{ minecraft_sub_domain }}.{{ minecraft_root_domain }}" }
+
+- name: Create data subvolume
+  community.general.btrfs_subvolume:
+    name: "{{ minecraft_project_vol }}"
+    state: present
+    filesystem_device: "{{ minecraft_fsdev }}"
+
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ item.value }}"
+    state: directory
+    mode: "0750"
+  with_dict: "{{ minecraft_dirs }}"
+
+- name: Copy compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ minecraft_base_dir }}/compose.yml"
+    mode: "0640"
+
+- name: Copy gate config
+  ansible.builtin.template:
+    src: gate_config.yml.j2
+    dest: "{{ minecraft_dirs.gate }}/config.yml"
+    mode: "0640"
+
+- name: Copy copyparty config
+  ansible.builtin.template:
+    src: copyparty.cfg.j2
+    dest: "{{ minecraft_dirs.copyparty }}/copyparty.conf"
+    mode: "0640"
+
+- name: Ensure Caddy configuration drop in directory exists
+  ansible.builtin.file:
+    path: /etc/caddy/conf.d
+    state: directory
+    mode: '0755'
+    owner: caddy
+    group: caddy
+
+- name: Copy caddyfile
+  ansible.builtin.template:
+    src: minecraft.caddy.j2
+    dest: /etc/caddy/conf.d/minecraft.caddy
+    owner: caddy
+    group: caddy
+    mode: "0644"
+  notify: "reload caddy"
+
+
+- name: Open tcp ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ minecraft_ports.gate }}"
+    proto: "tcp"
+
+- name: Open Bedrock ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ minecraft_ports.bedrock }}"
+    proto: "udp"
+
+- name: Ensure inotify-tools installed
+  ansible.builtin.package:
+    update_cache: true
+    name: inotify-tools
+    state: present
+
+- name: Install proxy fix script
+  ansible.builtin.template:
+    src: crafty_proxy_fix.sh.j2
+    dest: "{{ minecraft_base_dir}}/crafty_proxy_fix.sh"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install watcher script
+  ansible.builtin.template:
+    src: crafty_watch.sh.j2
+    dest: "{{ minecraft_base_dir}}/crafty_watch.sh"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Install watcher service
+  ansible.builtin.template:
+    src: crafty_watch.service.j2
+    dest: /etc/systemd/system/crafty_watch.service
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart crafty watcher
+
+- name: Enable watcher service
+  ansible.builtin.systemd:
+    name: crafty_watch.service
+    enabled: true
+    state: started
+
+- name: Bring stack up
+  community.docker.docker_compose_v2:
+    project_src: "{{ minecraft_base_dir }}"
+    build: always
+    recreate: always
+  register: minecraft_compose
+
+- name: Debug container data
+  ansible.builtin.debug:
+    var: minecraft_compose.containers[0]
+- name: Verify stack is running
+  ansible.builtin.assert:
+    that:
+      - crafty.State == 'running'
+      - gate.State == 'running'
+      - copyparty.State == 'running'
+  vars:
+    crafty: >-
+      {{ minecraft_compose.containers | selectattr("Service", "equalto", "crafty") | first }}
+    gate: >-
+      {{ minecraft_compose.containers | selectattr("Service", "equalto", "gate") | first }}
+    copyparty: >-
+      {{ minecraft_compose.containers | selectattr("Service", "equalto", "copyparty") | first }}

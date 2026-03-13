@@ -1,0 +1,29 @@
+config:
+  debug: true
+  bind: 0.0.0.0:25565
+  servers:
+# Pregenerate forcedroutes for crafty:25501...25599
+# TODO: either
+# - get lite routing enabled
+# - write a crafty-gate autoupdater using the REST APIs as servers start/stop
+{% for i in range(1, 100) %}
+{% set id = "%02d" | format(i) %}
+    server{{ id }}: "crafty:{{ 25500 + i }}"
+{% endfor %}
+  forcedHosts:
+{% for i in range(1, 100) %}
+{% set id = "%02d" | format(i) %}
+    "{{ id }}.mc.h0g.in": ["server{{ id }}"]
+{% endfor %}
+  connectionTimeout: 5s
+  readTimeout: 90s
+  proxyProtocol: true
+  quota:
+    connections:
+      enabled: true
+      ops: 5
+      burst: 10
+      maxEntries: 1000
+api:
+  enabled: true
+  bind: 0.0.0.0:8080

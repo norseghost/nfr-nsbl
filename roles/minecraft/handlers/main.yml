@@ -1,0 +1,14 @@
+- name: Reload Caddy
+  ansible.builtin.systemd:
+    name: caddy
+    state: reloaded
+  listen: "reload caddy"
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart crafty watcher
+  ansible.builtin.systemd:
+    name: crafty_watch.service
+    state: restarted

@@ -1,0 +1,48 @@
+services:
+  crafty:
+    container_name: crafty
+    image: registry.gitlab.com/crafty-controller/crafty-4:latest
+    restart: always
+    environment:
+      - TZ=Europe/Copenhagen
+    ports:
+      - "{{ minecraft_ports.crafty }}:8443" # HTTPS
+      - "{{ minecraft_ports.dynmap }}:8123" # DYNMAP
+      # - "{{ minecraft_ports.bedrock_servers }}:{{ minecraft_ports.bedrock_servers }}/udp" # BEDROCK
+      # - "{{ minecraft_ports.servers }}:{{ minecraft_ports.servers }}" # BEDROCK
+    volumes:
+      - "{{ minecraft_dirs.crafty }}/backups:/crafty/backups"
+      - "{{ minecraft_dirs.crafty }}/logs:/crafty/logs"
+      - "{{ minecraft_dirs.crafty }}/servers:/crafty/servers"
+      - "{{ minecraft_dirs.crafty }}/config:/crafty/app/config"
+      - "{{ minecraft_dirs.crafty }}/import:/crafty/import"
+  gate:
+    image: ghcr.io/minekube/gate:latest
+    container_name: gate
+    restart: unless-stopped
+    ports:
+      - "{{ minecraft_ports.gate }}:{{ minecraft_ports.gate }}"
+      - "{{ minecraft_ports.bedrock }}:{{ minecraft_ports.bedrock }}"
+    volumes:
+      - "{{ minecraft_dirs.gate }}/config.yml:/config.yml"
+  copyparty:
+    image: copyparty/min:latest
+    container_name: copyparty
+    ports:
+      - "{{ minecraft_ports.copyparty }}:3923"
+    volumes:
+      - "{{ minecraft_dirs.copyparty }}/:/cfg:z"
+      - "{{ minecraft_dirs.crafty }}:{{ minecraft_dirs.crafty }}:z"
+    environment:
+      LD_PRELOAD: /usr/lib/libmimalloc-secure.so.2
+      # enable mimalloc by replacing "NOPE" with "2" for a nice speed-boost (will use twice as much ram)
+      PYTHONUNBUFFERED: 1
+      # ensures log-messages are not delayed (but can reduce speed a tiny bit)
+    stop_grace_period: 15s # thumbnailer is allowed to continue finishing up for 10s after the shutdown signal
+    healthcheck:
+      # hide it from logs with "/._" so it matches the default --lf-url filter
+      test: ["CMD-SHELL", "wget --spider -q 127.0.0.1:3923/?reset=/._"]
+      interval: 1m
+      timeout: 2s
+      retries: 5
+      start_period: 15s
