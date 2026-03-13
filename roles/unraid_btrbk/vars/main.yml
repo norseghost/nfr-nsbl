@@ -1,5 +1,5 @@
 ---
-cron_schedule: "0 * * * *"
+unraid_btrbk_cron_schedule: "0 * * * *"
 unraid_btrbk_remote: kvasir.ts.h0g.in
 unraid_btrbk_remote_path: /mnt/botn
 # FIXME: role assumes all subvols to be backed up are on a disk under /mnt

@@ -73,14 +73,14 @@
     insertafter: EOF
     line: |
       # btrbk cron
-      echo "{{ cron_schedule }} {{ unraid_btrbk_command }} run" > /etc/cron/btrbk
+      echo "{{ unraid_btrbk_cron_schedule }} {{ unraid_btrbk_command }} run" > /etc/cron/btrbk
     state: present
 
 - name: Install btrbk cron job on running system
   ansible.builtin.copy:
     dest: /etc/cron.d/btrbk
     content: |
-      {{ cron_schedule }} {{ unraid_btrbk_command }} run
+      {{ unraid_btrbk_cron_schedule }} {{ unraid_btrbk_command }} run
     owner: root
     group: root
     mode: "0644"
