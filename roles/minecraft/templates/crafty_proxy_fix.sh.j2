@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DIR="$1"
+
+SERVER_PROPERTIES="$DIR/server.properties"
+PAPER_CONFIG="$DIR/config/paper-global.yml"
+SPIGOT_YML="$DIR/spigot.yml"
+
+if [[ -f "$SERVER_PROPERTIES" ]]; then
+    if grep -q '^online-mode=' "$SERVER_PROPERTIES"; then
+        sed -i 's/^online-mode=.*/online-mode=false/' "$SERVER_PROPERTIES"
+    else
+        echo "online-mode=false" >> "$SERVER_PROPERTIES"
+    fi
+fi
+
+if compgen -G "$DIR/paper*.jar" > /dev/null; then
+
+    mkdir -p "$DIR/config"
+    touch "$PAPER_CONFIG"
+
+    if ! grep -q '^proxies:' "$PAPER_CONFIG"; then
+cat >> "$PAPER_CONFIG" <<EOF
+
+proxies:
+  bungee-cord:
+    online-mode: true
+  proxy-protocol: true
+EOF
+    else
+        sed -i 's/online-mode:.*/online-mode: true/' "$PAPER_CONFIG" || true
+        sed -i 's/proxy-protocol:.*/proxy-protocol: true/' "$PAPER_CONFIG" || true
+    fi
+
+    touch "$SPIGOT_YML"
+
+    if grep -q 'settings.bungeecord:' "$SPIGOT_YML"; then
+        sed -i 's/settings.bungeecord:.*/settings.bungeecord: true/' "$SPIGOT_YML"
+    else
+        echo "settings.bungeecord: true" >> "$SPIGOT_YML"
+    fi
+fi
