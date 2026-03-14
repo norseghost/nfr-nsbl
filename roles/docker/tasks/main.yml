@@ -1,0 +1,38 @@
+- name: Add docker key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+
+- name: Add Docker repository to Apt sources
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_facts.distribution_release }} stable"
+    state: present
+    filename: docker
+
+- name: Ensure docker dependencies are installed
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - bc
+      - curl
+      - expect
+      - git
+      - ca-certificates
+    state: present
+
+- name: Install Docker and Docker Compose
+  ansible.builtin.apt:
+    update_cache: true
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
