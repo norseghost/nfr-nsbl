@@ -11,7 +11,7 @@ if [[ -f "$SERVER_PROPERTIES" ]]; then
     if grep -q '^online-mode=' "$SERVER_PROPERTIES"; then
         sed -i 's/^online-mode=.*/online-mode=false/' "$SERVER_PROPERTIES"
     else
-        echo "online-mode=false" >> "$SERVER_PROPERTIES"
+        echo -e  "\nonline-mode=false" >> "$SERVER_PROPERTIES"
     fi
 fi
 
@@ -38,6 +38,6 @@ EOF
     if grep -q 'settings.bungeecord:' "$SPIGOT_YML"; then
         sed -i 's/settings.bungeecord:.*/settings.bungeecord: true/' "$SPIGOT_YML"
     else
-        echo "settings.bungeecord: true" >> "$SPIGOT_YML"
+        echo -e "\nsettings.bungeecord: true" >> "$SPIGOT_YML"
     fi
 fi
