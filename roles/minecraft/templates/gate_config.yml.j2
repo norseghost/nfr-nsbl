@@ -1,6 +1,15 @@
 config:
   debug: true
   bind: 0.0.0.0:25565
+  connectionTimeout: 5s
+  readTimeout: 90s
+  proxyProtocol: false
+  quota:
+    connections:
+      enabled: true
+      ops: 5
+      burst: 10
+      maxEntries: 1000
   servers:
 # Pregenerate forcedroutes for crafty:25501...25599
 # TODO: either
@@ -15,15 +24,6 @@ config:
 {% set id = "%02d" | format(i) %}
     "{{ id }}.mc.h0g.in": ["server{{ id }}"]
 {% endfor %}
-  connectionTimeout: 5s
-  readTimeout: 90s
-  proxyProtocol: true
-  quota:
-    connections:
-      enabled: true
-      ops: 5
-      burst: 10
-      maxEntries: 1000
 api:
   enabled: true
   bind: 0.0.0.0:8080

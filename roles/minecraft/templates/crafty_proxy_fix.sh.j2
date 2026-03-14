@@ -26,11 +26,9 @@ cat >> "$PAPER_CONFIG" <<EOF
 proxies:
   bungee-cord:
     online-mode: true
-  proxy-protocol: true
 EOF
     else
         sed -i 's/online-mode:.*/online-mode: true/' "$PAPER_CONFIG" || true
-        sed -i 's/proxy-protocol:.*/proxy-protocol: true/' "$PAPER_CONFIG" || true
     fi
 
     touch "$SPIGOT_YML"
