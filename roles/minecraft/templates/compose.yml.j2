@@ -8,6 +8,7 @@ services:
     ports:
       - "{{ minecraft_ports.crafty }}:8443" # HTTPS
       - "{{ minecraft_ports.dynmap }}:8123" # DYNMAP
+      - "{{ minecraft_ports.voice }}:24454/udp" # VOICE
       # - "{{ minecraft_ports.bedrock_servers }}:{{ minecraft_ports.bedrock_servers }}/udp" # BEDROCK
       # - "{{ minecraft_ports.servers }}:{{ minecraft_ports.servers }}" # BEDROCK
     volumes:

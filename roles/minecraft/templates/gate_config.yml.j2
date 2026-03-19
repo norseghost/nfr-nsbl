@@ -2,8 +2,10 @@ config:
   debug: true
   bind: 0.0.0.0:25565
   connectionTimeout: 5s
-  readTimeout: 90s
-  proxyProtocol: false
+  readTimeout: 120s
+  forwarding:
+    mode: velocity
+    velocitySecret: "{{ minecraft_velocity_secret }}"
   quota:
     connections:
       enabled: true
