@@ -1,42 +1,101 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
+exec 2> >(logger)
 DIR="$1"
-
+[[ -d "$DIR" ]] || { echo "$DIR: not a directory" >&2; exit 1; }
 SERVER_PROPERTIES="$DIR/server.properties"
 PAPER_CONFIG="$DIR/config/paper-global.yml"
 SPIGOT_YML="$DIR/spigot.yml"
+PCF_TOML="$DIR/config/proxy-compatible-forge.toml"
+VELOCITY_SECRET="{{ minecraft_velocity_secret }}"
+
+# were gonna need this dir if it aint there
+mkdir -p "$DIR/config"
+# and setgid it root
+chmod 2755 "$DIR/config"
+
+
+# --------------------------------------------------
+# server.properties
+# --------------------------------------------------
 
 if [[ -f "$SERVER_PROPERTIES" ]]; then
+    logger "Minecraft server found at $DIR, setting online mode off"
     if grep -q '^online-mode=' "$SERVER_PROPERTIES"; then
         sed -i 's/^online-mode=.*/online-mode=false/' "$SERVER_PROPERTIES"
     else
-        echo -e  "\nonline-mode=false" >> "$SERVER_PROPERTIES"
+        printf "\nonline-mode=false\n" >> "$SERVER_PROPERTIES"
     fi
 fi
 
+
+# --------------------------------------------------
+# Paper config
+# --------------------------------------------------
+
 if compgen -G "$DIR/paper*.jar" > /dev/null; then
-
-    mkdir -p "$DIR/config"
-    touch "$PAPER_CONFIG"
-
-    if ! grep -q '^proxies:' "$PAPER_CONFIG"; then
-cat >> "$PAPER_CONFIG" <<EOF
-
+    logger "Paper server detected"
+    if [ ! -s "$PAPER_CONFIG" ]; then
+        logger "Paper server is uninitialized. Writing proxy settings."
+        cat > "$PAPER_CONFIG" <<EOF
 proxies:
   bungee-cord:
-    online-mode: true
+    online-mode: false
+  proxy-protocol: false
+  velocity:
+    enabled: true
+    online-mode: false
+    secret: "$VELOCITY_SECRET"
 EOF
     else
-        sed -i 's/online-mode:.*/online-mode: true/' "$PAPER_CONFIG" || true
+        logger "Found existing Paper server. Editing config for Velocity forwarding."
+        yq -i -y '
+        .proxies = {
+            "bungee-cord": {"online-mode": false},
+            "proxy-protocol": false,
+            "velocity": {
+                "enabled": true,
+                "online-mode": false,
+                "secret": "'"$VELOCITY_SECRET"'"
+            }
+        }
+    ' "$PAPER_CONFIG"
+    fi
+fi
+
+# --------------------------------------------------
+# Proxy-Compatible-Forge support
+# --------------------------------------------------
+
+if compgen -G "$DIR/forge-installer*.log" > /dev/null || \
+   compgen -G "$DIR/neoforge-installer*.log" > /dev/null; then
+    logger "Neo/Forge server detected."
+    logger "Forge: preparing mods folder."
+    mkdir -p "$DIR/mods"
+    chmod 2755 "$DIR/mods"
+    touch "$PCF_TOML"
+
+    if grep -qE '^\s*\[forwarding\]' "$PCF_TOML"; then
+        logger "Forge: Enabling Velocity in existing config."
+        if grep -qE '^\s*secret\s*=' "$PCF_TOML"; then
+            sed -i -E "s|^\s*secret\s*=.*|secret = \"${VELOCITY_SECRET}\"|" "$PCF_TOML"
+        else
+            sed -i -E "/^\s*\[forwarding\]/a secret = \"${VELOCITY_SECRET}\"" "$PCF_TOML"
+        fi
+    else
+        logger "Forge: Writing forwarding settings to new config."
+        cat >> "$PCF_TOML" <<EOF
+[forwarding]
+secret = "${VELOCITY_SECRET}"
+EOF
     fi
 
-    touch "$SPIGOT_YML"
-
-    if grep -q 'settings.bungeecord:' "$SPIGOT_YML"; then
-        sed -i 's/settings.bungeecord:.*/settings.bungeecord: true/' "$SPIGOT_YML"
-    else
-        echo -e "\nsettings.bungeecord: true" >> "$SPIGOT_YML"
+    if ! compgen -G "$DIR/mods/proxy-compatible-forge*.jar" > /dev/null; then
+        logger "Proxy Compatible Forwarding mod not found. Downloading."
+        DOWNLOAD_URL=$(curl -fsSL https://api.github.com/repos/adde0109/Proxy-Compatible-Forge/releases/latest \
+            | yq -r '.assets[] | select(.name | test("(?i)forge.*\\.jar$")) | .browser_download_url')
+        if [[ -n "$DOWNLOAD_URL" ]]; then
+            curl -fSL "$DOWNLOAD_URL" -o "$DIR/mods/$(basename "$DOWNLOAD_URL")"
+        fi
     fi
 fi
 logger "Set permissions to match Crafty"

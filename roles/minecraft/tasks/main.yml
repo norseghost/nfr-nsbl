@@ -76,10 +76,13 @@
     port: "{{ minecraft_ports.bedrock }}"
     proto: "udp"
 
-- name: Ensure inotify-tools installed
-  ansible.builtin.package:
+- name: Ensure  watcher tools installed
+  ansible.builtin.apt:
     update_cache: true
-    name: inotify-tools
+    name:
+      - inotify-tools
+      - yq
+      - curl
     state: present
 
 - name: Install proxy fix script
@@ -89,6 +92,8 @@
     owner: root
     group: root
     mode: "0755"
+  notify:
+    - Restart crafty watcher
 
 - name: Install watcher script
   ansible.builtin.template:
@@ -97,6 +102,8 @@
     owner: root
     group: root
     mode: "0755"
+  notify:
+    - Restart crafty watcher
 
 - name: Install watcher service
   ansible.builtin.template:

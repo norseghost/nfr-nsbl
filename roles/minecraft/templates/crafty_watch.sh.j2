@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 BASE="{{ minecraft_dirs.crafty }}/servers"
 
 inotifywait -mr \
   -e close_write \
   -e moved_to \
   --format '%w%f' \
-  "$BASE" | while read FILE; do
-
+  "$BASE" | while read -r FILE; do
     if [[ "$FILE" == */server.properties ]]; then
         DIR=$(dirname "$FILE")
-        /usr/local/bin/crafty-proxy-fix.sh "$DIR"
-    fi
+        STAMP="$DIR/.proxy_patched"
 
+        if [[ ! -f "$STAMP" ]]; then
+            {{ minecraft_base_dir }}/crafty_proxy_fix.sh "$DIR" \
+                && touch "$STAMP"
+        fi
+    fi
 done
