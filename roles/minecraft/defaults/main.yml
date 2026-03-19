@@ -18,7 +18,7 @@ minecraft_ports:
   copyparty: 3923
   crafty: 8443
   dynmap: 8123
-  gate: 25565
+  proxy: 25565
   voice: 24454
   bedrock: 19132
   bedrock_servers: 19133-19140

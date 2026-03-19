@@ -22,7 +22,7 @@ services:
     container_name: gate
     restart: unless-stopped
     ports:
-      - "{{ minecraft_ports.gate }}:{{ minecraft_ports.gate }}"
+      - "{{ minecraft_ports.proxy }}:{{ minecraft_ports.proxy }}"
       - "{{ minecraft_ports.bedrock }}:{{ minecraft_ports.bedrock }}"
     volumes:
       - "{{ minecraft_dirs.gate }}/config.yml:/config.yml"
