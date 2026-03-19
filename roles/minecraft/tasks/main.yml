@@ -58,12 +58,17 @@
     mode: "0644"
   notify: "reload caddy"
 
-
-- name: Open tcp ports
+- name: Open tcp port
   community.general.ufw:
     rule: allow
     port: "{{ minecraft_ports.gate }}"
     proto: "tcp"
+
+- name: Open voice ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ minecraft_ports.voice }}"
+    proto: "udp"
 
 - name: Open Bedrock ports
   community.general.ufw:
