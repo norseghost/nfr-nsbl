@@ -39,3 +39,5 @@ EOF
         echo -e "\nsettings.bungeecord: true" >> "$SPIGOT_YML"
     fi
 fi
+logger "Set permissions to match Crafty"
+chown -R 1000:0 "$DIR"

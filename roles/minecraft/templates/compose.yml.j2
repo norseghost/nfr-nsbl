@@ -28,6 +28,7 @@ services:
   copyparty:
     image: copyparty/min:latest
     container_name: copyparty
+    user: 1000:0
     ports:
       - "{{ minecraft_ports.copyparty }}:3923"
     volumes:
