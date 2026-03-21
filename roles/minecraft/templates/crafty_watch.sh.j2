@@ -10,7 +10,13 @@ inotifywait -mr \
     if [[ "$FILE" == */server.properties ]]; then
         DIR=$(dirname "$FILE")
         STAMP="$DIR/.proxy_patched"
-
+        if [[ ! -f "$STAMP" ]]; then
+            {{ minecraft_base_dir }}/crafty_proxy_fix.sh "$DIR" \
+                && touch "$STAMP"
+        fi
+    elif [[ "$FILE" =~ .*/[neo]*forge-installer.*\.log$ ]]; then
+        DIR=$(dirname "$FILE")
+        STAMP="$DIR/.proxy_forge_patched"
         if [[ ! -f "$STAMP" ]]; then
             {{ minecraft_base_dir }}/crafty_proxy_fix.sh "$DIR" \
                 && touch "$STAMP"
