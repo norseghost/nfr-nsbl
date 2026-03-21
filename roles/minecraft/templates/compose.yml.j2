@@ -23,7 +23,7 @@ services:
     environment:
       TYPE: VELOCITY
       CFG_MOTD: See mc.h0g.in/status for avaliable servers
-      DEBUG: "true"
+      DEBUG: "false"
     ports:
       - "{{ minecraft_ports.proxy }}:{{ minecraft_ports.proxy }}"
       - "{{ minecraft_ports.bedrock }}:{{ minecraft_ports.bedrock }}/udp"
