@@ -2,7 +2,7 @@
 
 Combines:
 
-- [Gate Minecraft Proxy](https://gate.minekube.com/)
+- [Velocity Minecraft Proxy](https://gate.minekube.com/)
 - [Crafty Controller](https://craftycontrol.com/)
 - [Copyparty](https://copyparty.eu/)
 
