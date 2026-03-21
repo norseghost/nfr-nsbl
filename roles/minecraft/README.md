@@ -10,7 +10,11 @@ Combines:
 Currently, assumes the stack lives on `/srv/`, and is a Btrfs subvolume.
 
 # Limitations
+
 Crossplay is not enabled yet.
 
-There are permission issues to iron out with adding files to crafty
-subdirectories.
+- [ ] Add geyser and floodgate to velocity
+    - [ ] mods/plugins
+- [ ] Add a vanilla ish paper server outside of crafty
+    - [ ] Add floodgate
+    - [ ] mods/plugins
