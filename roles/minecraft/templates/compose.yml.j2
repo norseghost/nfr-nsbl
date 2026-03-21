@@ -26,6 +26,7 @@ services:
       DEBUG: "true"
     ports:
       - "{{ minecraft_ports.proxy }}:{{ minecraft_ports.proxy }}"
+      - "{{ minecraft_ports.bedrock }}:{{ minecraft_ports.bedrock }}/udp"
     volumes:
       - "{{ minecraft_dirs.velocity }}/config/velocity.toml:/config/velocity.toml"
       - "{{ minecraft_dirs.velocity }}/config/forwarding.secret:/config/forwarding.secret"
