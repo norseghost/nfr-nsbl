@@ -50,12 +50,19 @@
     dest: "{{ minecraft_dirs.velocity }}/config/forwarding.secret"
     mode: "0640"
 
-- name: Download Ambassador mod jar
+- name: Download Velocity plugins
   ansible.builtin.get_url:
-    url: "https://github.com/adde0109/Ambassador/releases/latest/download/Ambassador-Velocity-1.4.5-all.jar"
-    dest: "{{ minecraft_dirs.velocity }}/plugins/ambassador.jar"
+    url: "{{ item.url }}"
+    dest: "{{ minecraft_dirs.velocity }}/plugins/{{ item.name }}.jar"
     mode: '0644'
     force: true
+  loop:
+    - name: geyser
+      url: "https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/velocity"
+    - name: floodgate
+      url: "https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity"
+    - name: ambassador
+      url: "https://github.com/adde0109/Ambassador/releases/latest/download/Ambassador-Velocity-1.4.5-all.jar"
 
 - name: Copy copyparty config
   ansible.builtin.template:
