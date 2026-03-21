@@ -24,7 +24,6 @@ services:
       TYPE: VELOCITY
       CFG_MOTD: See mc.h0g.in/status for avaliable servers
       DEBUG: "true"
-      MODRINTH_PROJECTS: ambassador
     ports:
       - "{{ minecraft_ports.proxy }}:{{ minecraft_ports.proxy }}"
     volumes:
