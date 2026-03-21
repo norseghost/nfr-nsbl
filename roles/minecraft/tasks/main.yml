@@ -23,17 +23,39 @@
     mode: "0750"
   with_dict: "{{ minecraft_dirs }}"
 
+- name: Create directories
+  ansible.builtin.file:
+    path: "{{ minecraft_dirs.velocity }}/{{ item }}"
+    state: directory
+    mode: "0750"
+  loop:
+    - config
+    - plugins
+
 - name: Copy compose file
   ansible.builtin.template:
     src: compose.yml.j2
     dest: "{{ minecraft_base_dir }}/compose.yml"
     mode: "0640"
 
-- name: Copy gate config
+- name: Copy velocity config
   ansible.builtin.template:
-    src: gate_config.yml.j2
-    dest: "{{ minecraft_dirs.gate }}/config.yml"
+    src: velocity.toml.j2
+    dest: "{{ minecraft_dirs.velocity }}/config/velocity.toml"
     mode: "0640"
+
+- name: Copy velocity secret
+  ansible.builtin.template:
+    src: velocity.secret.j2
+    dest: "{{ minecraft_dirs.velocity }}/config/forwarding.secret"
+    mode: "0640"
+
+- name: Download Ambassador mod jar
+  ansible.builtin.get_url:
+    url: "https://github.com/adde0109/Ambassador/releases/latest/download/Ambassador-Velocity-1.4.5-all.jar"
+    dest: "{{ minecraft_dirs.velocity }}/plugins/ambassador.jar"
+    mode: '0644'
+    force: true
 
 - name: Copy copyparty config
   ansible.builtin.template:
@@ -58,13 +80,13 @@
     mode: "0644"
   notify: "reload caddy"
 
-- name: Open tcp port
+- name: Open tcp port for proxy
   community.general.ufw:
     rule: allow
-    port: "{{ minecraft_ports.gate }}"
+    port: "{{ minecraft_ports.proxy }}"
     proto: "tcp"
 
-- name: Open voice ports
+- name: Open udp port for voice
   community.general.ufw:
     rule: allow
     port: "{{ minecraft_ports.voice }}"
@@ -76,7 +98,7 @@
     port: "{{ minecraft_ports.bedrock }}"
     proto: "udp"
 
-- name: Ensure  watcher tools installed
+- name: Install tools for watcher
   ansible.builtin.apt:
     update_cache: true
     name:
@@ -125,21 +147,20 @@
     project_src: "{{ minecraft_base_dir }}"
     build: always
     recreate: always
+    pull: always
+    state: restarted
   register: minecraft_compose
 
-- name: Debug container data
-  ansible.builtin.debug:
-    var: minecraft_compose.containers[0]
 - name: Verify stack is running
   ansible.builtin.assert:
     that:
       - crafty.State == 'running'
-      - gate.State == 'running'
+      - velocity.State == 'running'
       - copyparty.State == 'running'
   vars:
     crafty: >-
       {{ minecraft_compose.containers | selectattr("Service", "equalto", "crafty") | first }}
-    gate: >-
-      {{ minecraft_compose.containers | selectattr("Service", "equalto", "gate") | first }}
+    velocity: >-
+      {{ minecraft_compose.containers | selectattr("Service", "equalto", "velocity") | first }}
     copyparty: >-
       {{ minecraft_compose.containers | selectattr("Service", "equalto", "copyparty") | first }}

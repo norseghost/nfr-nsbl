@@ -43,7 +43,7 @@ proxies:
   proxy-protocol: false
   velocity:
     enabled: true
-    online-mode: false
+    online-mode: true
     secret: "$VELOCITY_SECRET"
 EOF
     else
@@ -54,7 +54,7 @@ EOF
             "proxy-protocol": false,
             "velocity": {
                 "enabled": true,
-                "online-mode": false,
+                "online-mode": true,
                 "secret": "'"$VELOCITY_SECRET"'"
             }
         }

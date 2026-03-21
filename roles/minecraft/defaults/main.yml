@@ -11,7 +11,7 @@ minecraft_parent_dir: /srv
 minecraft_base_dir: "{{ minecraft_parent_dir }}/{{ minecraft_project_vol}}"
 minecraft_dirs:
   crafty: "{{ minecraft_base_dir }}/crafty"
-  gate: "{{ minecraft_base_dir }}/gate"
+  velocity: "{{ minecraft_base_dir }}/velocity"
   copyparty: "{{ minecraft_base_dir }}/copyparty"
 # server ports cannot conflict with proxy ports
 minecraft_ports:

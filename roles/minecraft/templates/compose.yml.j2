@@ -17,15 +17,21 @@ services:
       - "{{ minecraft_dirs.crafty }}/servers:/crafty/servers"
       - "{{ minecraft_dirs.crafty }}/config:/crafty/app/config"
       - "{{ minecraft_dirs.crafty }}/import:/crafty/import"
-  gate:
-    image: ghcr.io/minekube/gate:latest
-    container_name: gate
-    restart: unless-stopped
+  velocity:
+    image: itzg/mc-proxy
+    container_name: velocity
+    environment:
+      TYPE: VELOCITY
+      CFG_MOTD: See mc.h0g.in/status for avaliable servers
+      DEBUG: "true"
+      MODRINTH_PROJECTS: ambassador
     ports:
       - "{{ minecraft_ports.proxy }}:{{ minecraft_ports.proxy }}"
-      - "{{ minecraft_ports.bedrock }}:{{ minecraft_ports.bedrock }}"
     volumes:
-      - "{{ minecraft_dirs.gate }}/config.yml:/config.yml"
+      - "{{ minecraft_dirs.velocity }}/config/velocity.toml:/config/velocity.toml"
+      - "{{ minecraft_dirs.velocity }}/config/forwarding.secret:/config/forwarding.secret"
+      - "{{ minecraft_dirs.velocity }}/plugins:/plugins"
+      - "{{ minecraft_dirs.velocity }}/data:/server"
   copyparty:
     image: copyparty/min:latest
     container_name: copyparty
