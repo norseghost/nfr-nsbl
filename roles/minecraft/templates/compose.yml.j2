@@ -41,6 +41,7 @@ services:
     volumes:
       - "{{ minecraft_dirs.copyparty }}/:/cfg:z"
       - "{{ minecraft_dirs.crafty }}:{{ minecraft_dirs.crafty }}:z"
+      - "{{ minecraft_dirs.servers }}:{{ minecraft_dirs.servers }}:z"
     environment:
       LD_PRELOAD: /usr/lib/libmimalloc-secure.so.2
       # enable mimalloc by replacing "NOPE" with "2" for a nice speed-boost (will use twice as much ram)
