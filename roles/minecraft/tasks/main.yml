@@ -1,3 +1,4 @@
+---
 - name: Configure Cloudflare DNS for Minecraft
   community.general.cloudflare_dns:
     zone: "{{ minecraft_root_domain }}"
@@ -54,7 +55,7 @@
   ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: "{{ minecraft_dirs.velocity }}/plugins/{{ item.name }}.jar"
-    mode: '0644'
+    mode: "0644"
     force: true
   loop:
     - name: geyser
@@ -64,19 +65,53 @@
     - name: ambassador
       url: "https://github.com/adde0109/Ambassador/releases/latest/download/Ambassador-Velocity-1.4.5-all.jar"
 
+- name: Create folder for Geyser
+  ansible.builtin.file:
+    path: "{{ minecraft_dirs.velocity }}/plugins/{{ item }}"
+    state: directory
+    mode: "0750"
+  loop:
+    - Geyser-Velocity
+    - floodgate
+
+- name: Copy Geyser config
+  ansible.builtin.template:
+    src: geyser.yml.j2
+    dest: "{{ minecraft_dirs.velocity }}/plugins/Geyser-Velocity/config.yml"
+    mode: "0640"
+
+- name: Copy floodgate key to velocity
+  ansible.builtin.copy:
+    src: "{{ minecraft_floodgate_key }}"
+    dest: "{{ minecraft_dirs.velocity }}/plugins/floodgate/key.pem"
+    mode: "0600"
+
+- name: Create Minecraft server directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0750"
+  loop: "{{ minecraft_server_dirs }}"
+
+- name: Create folder for floodgate in crossplay server
+  ansible.builtin.file:
+    path: "{{ minecraft_server_dirs }}/crossplay/plugins/{{ item }}"
+    state: directory
+    mode: "0750"
+  loop:
+    - floodgate
+
+- name: Copy floodgate key file to crossplay server
+  ansible.builtin.copy:
+    src: "{{ minecraft_floodgate_key }}"
+    dest: "{{ minecraft_server_dirs }}/crossplay/plugins/floodgate/key.pem"
+    mode: "0600"
+
 - name: Copy copyparty config
   ansible.builtin.template:
     src: copyparty.cfg.j2
     dest: "{{ minecraft_dirs.copyparty }}/copyparty.conf"
     mode: "0640"
-
-- name: Ensure Caddy configuration drop in directory exists
-  ansible.builtin.file:
-    path: /etc/caddy/conf.d
-    state: directory
-    mode: '0755'
-    owner: caddy
-    group: caddy
 
 - name: Copy caddyfile
   ansible.builtin.template:
@@ -117,7 +152,7 @@
 - name: Install proxy fix script
   ansible.builtin.template:
     src: crafty_proxy_fix.sh.j2
-    dest: "{{ minecraft_base_dir}}/crafty_proxy_fix.sh"
+    dest: "{{ minecraft_base_dir }}/crafty_proxy_fix.sh"
     owner: root
     group: root
     mode: "0755"
@@ -127,7 +162,7 @@
 - name: Install watcher script
   ansible.builtin.template:
     src: crafty_watch.sh.j2
-    dest: "{{ minecraft_base_dir}}/crafty_watch.sh"
+    dest: "{{ minecraft_base_dir }}/crafty_watch.sh"
     owner: root
     group: root
     mode: "0755"
