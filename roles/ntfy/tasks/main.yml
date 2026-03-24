@@ -11,7 +11,7 @@
   ansible.builtin.get_url:
     url: "https://archive.ntfy.sh/apt/keyring.gpg"
     dest: /usr/share/keyrings/ntfy-keyring.gpg
-    mode: '0644'
+    mode: "0644"
 
 - name: Add ntfy repository
   ansible.builtin.apt_repository:
@@ -54,5 +54,5 @@
     dest: "/etc/caddy/conf.d/ntfy.caddy"
     owner: caddy
     group: caddy
-    mode: '0644'
+    mode: "0644"
   notify: "reload caddy"

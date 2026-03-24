@@ -1,3 +1,4 @@
+---
 - name: Install headscale deb
   when: headscale_install_needed
   ansible.builtin.apt:

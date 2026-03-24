@@ -1,3 +1,4 @@
+---
 - name: Restart headscale
   ansible.builtin.systemd:
     name: headscale

@@ -1,5 +1,4 @@
 ---
-
 - name: Map system architecture
   ansible.builtin.set_fact:
     headscale_arch: "{{ headscale_arch_map[ansible_facts['architecture']] }}"

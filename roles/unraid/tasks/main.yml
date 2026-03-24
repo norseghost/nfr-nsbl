@@ -15,7 +15,6 @@
     group: "100"
     mode: "0750"
 
-
 - name: Ensure backup cron job is installed via go
   ansible.builtin.lineinfile:
     path: /boot/config/go

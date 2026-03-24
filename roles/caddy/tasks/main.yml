@@ -16,15 +16,13 @@
 
 - name: Add Caddy repository to sources list
   ansible.builtin.apt_repository:
-    repo:
-      "deb https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    repo: "deb https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
     state: present
     filename: caddy-stable
 
 - name: Add Caddy src repository to sources list
   ansible.builtin.apt_repository:
-    repo:
-      "deb-src https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
+    repo: "deb-src https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main"
     state: present
     filename: caddy-stable
 
@@ -38,7 +36,7 @@
   ansible.builtin.file:
     path: /etc/caddy
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: caddy
     group: caddy
 
@@ -46,7 +44,7 @@
   ansible.builtin.file:
     path: /etc/caddy/conf.d
     state: directory
-    mode: '0755'
+    mode: "0755"
     owner: caddy
     group: caddy
 
@@ -69,7 +67,7 @@
     dest: /etc/caddy/Caddyfile
     owner: caddy
     group: caddy
-    mode: '0644'
+    mode: "0644"
     # This validates the config before overwriting the old one
     validate: caddy validate --adapter caddyfile --config %s
   notify: "reload caddy"

@@ -26,7 +26,7 @@
     dest: "{{ headscale_config_dir }}/acl.json"
     owner: "{{ headscale_user }}"
     group: "{{ headscale_group }}"
-    mode: '0644'
+    mode: "0644"
   notify: Restart headscale
   when: headscale_bin.stat.exists
 

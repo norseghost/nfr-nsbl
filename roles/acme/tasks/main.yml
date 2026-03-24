@@ -1,13 +1,14 @@
+---
 - name: Ensure ACME account key directory exists
   ansible.builtin.file:
     path: "{{ acme.account_key_src | dirname }}"
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
 
 - name: Ensure ACME account key exists
   community.crypto.openssl_privatekey:
     path: "{{ acme.account_key_src }}"
     size: 4096
-    mode: '0644'
+    mode: "0644"

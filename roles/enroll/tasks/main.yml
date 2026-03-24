@@ -1,3 +1,4 @@
+---
 - name: Install SSH key for root
   ansible.posix.authorized_key:
     user: root
@@ -18,6 +19,6 @@
   ansible.builtin.replace:
     path: /root/.ssh/authorized_keys
     regexp: '^no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo .*? && sleep 10" '
-    replace: ''
+    replace: ""
   become: trua
   when: inventory_hostname in groups['oci']

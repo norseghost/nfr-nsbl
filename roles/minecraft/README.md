@@ -9,7 +9,7 @@ Combines:
 ## Assumptions
 Currently, assumes the stack lives on `/srv/`, and is a Btrfs subvolume.
 
-# Limitations
+# Future Plans
 
 Crossplay is not enabled yet.
 
@@ -18,3 +18,5 @@ Crossplay is not enabled yet.
 - [ ] Add a vanilla ish paper server outside of crafty
     - [ ] Add floodgate
     - [ ] mods/plugins
+
+Stack runs on OCI, should at least handle opening ports

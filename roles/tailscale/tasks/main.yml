@@ -1,14 +1,14 @@
 ---
-
 - name: Download Tailscale GPG key
   ansible.builtin.get_url:
     url: "https://pkgs.tailscale.com/stable/{{ ansible_facts.distribution | lower }}/{{ ansible_facts.distribution_release }}.noarmor.gpg"
     dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
-    mode: '0644'
+    mode: "0644"
 
 - name: Add Tailscale repository
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/{{ ansible_facts.distribution | lower }} {{ ansible_facts.distribution_release }} main"
+    repo: "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/{{ ansible_facts.distribution | lower }} {{ ansible_facts.distribution_release
+      }} main"
     state: present
 
 - name: Install Tailscale package
@@ -70,7 +70,7 @@
     body:
       # Use the integer ID from the previous step, NOT the string name
       user: "{{ tailscale_user_info.json.users[0].id | int }}"
-      expiration: "{{ '%Y-%m-%dT%H:%M:%SZ' | strftime( (ansible_facts.date_time.epoch | int) + 86400 ) }}"
+      expiration: "{{ '%Y-%m-%dT%H:%M:%SZ' | strftime((ansible_facts.date_time.epoch | int) + 86400) }}"
     status_code: 200
   register: headscale_key_response
   delegate_to: localhost
