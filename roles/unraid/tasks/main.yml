@@ -48,6 +48,7 @@
   failed_when: false
   changed_when: false
 
+  # TODO: use btrfs collection
 - name: Create missing btrfs subvolumes
   ansible.builtin.command: >
     btrfs subvolume create {{ item.item }}
