@@ -20,5 +20,5 @@
     path: /root/.ssh/authorized_keys
     regexp: '^no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo .*? && sleep 10" '
     replace: ""
-  become: trua
+  become: true
   when: inventory_hostname in groups['oci']
