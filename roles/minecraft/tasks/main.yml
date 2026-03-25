@@ -24,14 +24,12 @@
     mode: "0750"
   with_dict: "{{ minecraft_dirs }}"
 
-- name: Create directories
-  ansible.builtin.file:
-    path: "{{ minecraft_dirs.velocity }}/{{ item }}"
-    state: directory
-    mode: "0750"
-  loop:
-    - config
-    - plugins
+- name: Copy compose file
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ minecraft_base_dir }}/compose.yml"
+    mode: "0640"
+  register: minecraft_compose_status
 
 - name: Copy common configs to shared directory
   ansible.builtin.copy:
@@ -41,11 +39,14 @@
   loop:
     - user_jvm_args.txt
 
-- name: Copy compose file
-  ansible.builtin.template:
-    src: compose.yml.j2
-    dest: "{{ minecraft_base_dir }}/compose.yml"
-    mode: "0640"
+- name: Create directories for Velocity
+  ansible.builtin.file:
+    path: "{{ minecraft_dirs.velocity }}/{{ item }}"
+    state: directory
+    mode: "0750"
+  loop:
+    - config
+    - plugins
 
 - name: Copy velocity config
   ansible.builtin.template:
