@@ -16,7 +16,7 @@ minecraft_dirs:
   copyparty: "{{ minecraft_base_dir }}/copyparty"
   servers: "{{ minecraft_base_dir }}/servers"
 minecraft_server_dirs:
-  crossplay: "{{ minecraft_base_dir.servers }}/crossplay"
+  crossplay: "{{ minecraft_dirs.servers }}/crossplay"
 # server ports cannot conflict with proxy ports
 minecraft_ports:
   copyparty: 3923

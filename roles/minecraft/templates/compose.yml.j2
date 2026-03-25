@@ -35,18 +35,23 @@ services:
       - "{{ minecraft_dirs.velocity }}/data:/server"
   crossplay:
     image: itzg/minecraft-server
-    container_name: srv-crossplay
+    container_name: crossplay
     stdin_open: true
     tty: true
     environment:
-    EULA: "true"
-    TYPE: "PAPER"
-    PLUGINS: |
-      # TODO: move to a file, or in ansible
-      https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/velocity
+      EULA: "true"
+      TYPE: "PAPER"
+      MOTD: "Java and Bedrock sitting in a tree\nK-I-S-S-I-N-G"
+      MEMORY: 4G
+      ENFORCE_SECURE_PROFILE: "false"
+      NETWORK_COMPRESSION_THRESHOLD: "-1"
+      ONLINE_MODE: "false"
+      PLUGINS: |
+        # TODO: move to a file, or in ansible
+        https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
     volumes:
       - "{{ minecraft_server_dirs.crossplay }}/plugins:/plugins"
-      - "{{ minecraft_server_dirs.crossplay }}/data:/server"
+      - "{{ minecraft_server_dirs.crossplay }}/data:/data"
   copyparty:
     image: copyparty/min:latest
     container_name: copyparty
