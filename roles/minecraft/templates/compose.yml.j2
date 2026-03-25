@@ -20,6 +20,8 @@ services:
   velocity:
     image: itzg/mc-proxy
     container_name: velocity
+    stdin_open: true
+    tty: true
     environment:
       TYPE: VELOCITY
       DEBUG: "false"
@@ -33,7 +35,9 @@ services:
       - "{{ minecraft_dirs.velocity }}/data:/server"
   crossplay:
     image: itzg/minecraft-server
-    container-name: srv-crossplay
+    container_name: srv-crossplay
+    stdin_open: true
+    tty: true
     environment:
     EULA: "true"
     TYPE: "PAPER"
