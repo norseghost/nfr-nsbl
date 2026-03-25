@@ -15,6 +15,7 @@ minecraft_dirs:
   velocity: "{{ minecraft_base_dir }}/velocity"
   copyparty: "{{ minecraft_base_dir }}/copyparty"
   servers: "{{ minecraft_base_dir }}/servers"
+  config: "{{ minecraft_base_dir }}/config"
 minecraft_server_dirs:
   crossplay: "{{ minecraft_dirs.servers }}/crossplay"
 # server ports cannot conflict with proxy ports
