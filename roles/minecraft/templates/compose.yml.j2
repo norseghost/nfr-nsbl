@@ -52,6 +52,7 @@ services:
     volumes:
       - "{{ minecraft_server_dirs.crossplay }}/plugins:/plugins"
       - "{{ minecraft_server_dirs.crossplay }}/data:/data"
+      - "{{ minecraft_server_dirs.crossplay }}/config:/config"
   copyparty:
     image: copyparty/min:latest
     container_name: copyparty
