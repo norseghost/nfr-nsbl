@@ -33,6 +33,14 @@
     - config
     - plugins
 
+- name: Copy common configs to shared directory
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ minecraft_dirs.config }}"
+    mode: "0640"
+  loop:
+    - user_jvm_args.txt
+
 - name: Copy compose file
   ansible.builtin.template:
     src: compose.yml.j2
