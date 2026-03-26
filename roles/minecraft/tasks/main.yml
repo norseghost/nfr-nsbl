@@ -39,6 +39,14 @@
   loop:
     - user_jvm_args.txt
 
+- name: Generate common configs to shared directory
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ minecraft_dirs.config }}"
+    mode: "0640"
+  loop:
+    - paper-global.yml.j2
+
 - name: Create directories for Velocity
   ansible.builtin.file:
     path: "{{ minecraft_dirs.velocity }}/{{ item }}"
@@ -96,12 +104,6 @@
     dest: "{{ minecraft_dirs.velocity }}/plugins/Geyser-Velocity/config.yml"
     mode: "0640"
 
-- name: Copy floodgate key to velocity
-  ansible.builtin.copy:
-    content: "{{ minecraft_floodgate_key }}"
-    dest: "{{ minecraft_dirs.velocity }}/plugins/floodgate/key.pem"
-    mode: "0600"
-
 - name: Create Minecraft server directories
   ansible.builtin.file:
     path: "{{ item.value }}"
@@ -111,9 +113,11 @@
 
 - name: Create folders in crossplay server
   ansible.builtin.file:
-    path: "{{ minecraft_server_dirs.crossplay }}/plugins/{{ item }}"
+    path: "{{ minecraft_server_dirs.crossplay }}/{{ item }}"
     state: directory
     mode: "0750"
+    owner: "1000"
+    group: "1000"
   loop:
     - plugins
     - config
@@ -123,14 +127,18 @@
     path: "{{ minecraft_server_dirs.crossplay }}/plugins/{{ item }}"
     state: directory
     mode: "0750"
+    owner: "1000"
+    group: "1000"
   loop:
     - floodgate
 
 - name: Copy floodgate key file to velocity proxy and crossplay server
   ansible.builtin.copy:
-    content: "{{ minecraft_floodgate_key }}"
+    content: "{{ minecraft_floodgate_key | b64decode }}"
     dest: "{{ item }}/plugins/floodgate/key.pem"
-    mode: "0600"
+    mode: "0660"
+    owner: "1000"
+    group: "1000"
   loop:
     - "{{ minecraft_dirs.velocity }}"
     - "{{ minecraft_server_dirs.crossplay }}"
@@ -139,7 +147,9 @@
   ansible.builtin.template:
     src: paper-global.yml.j2
     dest: "{{ minecraft_server_dirs.crossplay }}/config/paper-global.yml"
-    mode: "0640"
+    mode: "0660"
+    owner: "1000"
+    group: "1000"
 
 - name: Copy copyparty config
   ansible.builtin.template:
