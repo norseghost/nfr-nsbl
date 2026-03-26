@@ -47,7 +47,6 @@ services:
       NETWORK_COMPRESSION_THRESHOLD: "-1"
       ONLINE_MODE: "false"
       PLUGINS: |
-        # TODO: move to a file, or in ansible
         https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot
     volumes:
       - "{{ minecraft_server_dirs.crossplay }}/plugins:/plugins"
