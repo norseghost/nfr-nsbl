@@ -1,0 +1,13 @@
+---
+btrbk_remote: "mimer.ts.h0g.in"
+btrbk_remote_path: "/mnt/user/backups/{{ ansible_facts.hostname }}"
+# any btrfs subvolumes that are
+# - immediate children
+# - not hidden
+# will be backed up
+btrbk_volumes:
+  - /srv
+# non absolute paths are on root of each volume
+btrbk_snapshot_location: ".snapshots"
+btrbk_ssh_private_key: "{{ ssh.private_key }}"
+btrbk_ssh_public_key: "{{ user.pubkey }}"
