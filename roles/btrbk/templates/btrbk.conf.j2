@@ -1,0 +1,27 @@
+# Retention Policy: 24 hourly, 7 daily, 4 weekly, 3 monthly
+snapshot_preserve_min      {{ btrbk_snapshot_min }}
+snapshot_preserve          {{ btrbk_snapshot_freq }}
+target_preserve_min        {{ btrbk_target_min }}
+target_preserve            {{ btrbk_target_freq }}
+{% if btrbk_ssh_identity %}
+ssh_identity {{ btrbk_ssh_identity }}
+{% endif %}
+# Volume Definitions
+{% set groups = {} %}
+{% for label, path in btrbk_volumes.items() %}
+{% set base = path.split('/')[0:3] | join('/') %}
+{% if base not in groups %}
+  {% set _ = groups.update({base: []}) %}
+{% endif %}
+{% set _ = groups[base].append({'label': label, 'path': path}) %}
+{% endfor %}
+
+{% for base_path, subvolumes in groups.items() %}
+volume {{ base_path }}
+snapshot_dir .snapshots
+{% for sub in subvolumes %}
+subvolume {{ sub.path | replace(base_path + '/', '') }}
+  snapshot_name {{ sub.label }}
+  target ssh://{{ btrbk_remote }}{{ btrbk_remote_path }}
+{% endfor %}
+{% endfor %}
