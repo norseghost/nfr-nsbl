@@ -1,0 +1,47 @@
+---
+- name: Ensure dependencies for btrbk
+  ansible.builtin.apt:
+    name: curl
+    state: present
+    update_cache: true
+
+- name: Install btrbk from package
+  ansible.builtin.apt:
+    name: btrbk
+    state: present
+  failed_when: false
+
+- name: Create btrbk configuration direcrtory
+  ansible.builtin.file:
+    path: "{{ btrbk_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Copy btrbk ssh identity file
+  ansible.builtin.copy:
+    content: "{{ btrbk_ssh_private_key }}"
+    dest: "{{ btrbk_ssh_identity }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Inspect btrfs filesystem
+  community.general.btrfs_info:
+  register: btrbk_btrfs_data
+
+- name: Debug btrfs filesystem data
+  ansible.builtin.debug:
+    var: btrbk_btrfs_data
+#
+# - name: Assert path is a valid btrfs mount
+#   assert:
+#     that:
+#       - item.failed == false
+#     fail_msg: "The path {{ item.item }} is not a valid Btrfs filesystem."
+#   loop: "{{ btrbk_btrfs_data.results }}"
+
+
+# - name: Set up btrbk subvolumes
+# - name: Set up btrbk configuration
