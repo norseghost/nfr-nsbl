@@ -7,38 +7,39 @@
 #     - name: Define shorthand for host ipv4
 #       ansible.builtin.set_fact:
 #         ipv4_addr: "{{ ansible_facts.default_ipv4.address }}"
-# 
+#
 # - name: Common setup
 #   hosts: vps
 #   roles:
 #     - enroll
 #     - harden
 #     - caddy
-# 
+#
 # - name: Backup server
 #   hosts: backup
 #   roles:
 #     - backup
-# 
+#
 # - name: Set up headscale orchestrator
 #   hosts: vpn
 #   gather_facts: true
 #   roles:
 #     - headscale
 #     - ntfy
-# 
+#
 # - name: Set up VPSes
 #   hosts: vps
 #   roles:
 #     - tailscale
-# 
+#
 # - name: Set up UnRAID
 #   hosts: nas
 #   roles:
 #     - unraid
 #     - unraid_btrbk
-# 
+#
+
 - name: Set up server nodes
   hosts: trym
   roles:
-    - minecraft
+    - btrbk
