@@ -34,6 +34,47 @@
 - name: Debug btrfs filesystem data
   ansible.builtin.debug:
     var: btrbk_btrfs_data
+
+- name: Process Btrfs data for btrbk targets
+  set_fact:
+    btrbk_configs: >-
+      {%- set results = [] -%}
+      {%- for fs in btrbk_btrfs_data.filesystems -%}
+        {%- for target_path in btrbk_volumes -%}
+          {# Find the ID of the subvolume actually mounted at our target #}
+          {%- set root_match = fs.subvolumes | selectattr('mountpoints', 'contains', target_path) | first | default(none) -%}
+
+          {%- if root_match -%}
+            {# filter:
+               1. parent must match root ID
+               2. path must NOT have more than one level of nesting (regex)
+               3. ignore hidden paths (starting with .)
+            #} 
+            {%- set children = fs.subvolumes
+              | selectattr('parent', 'equalto', root_match.id)
+              | map(attribute='path')
+              | reject('match', '^/[^/]+/[^/]+')
+              | select('match', '^/(?!\\.).*')
+              | map('regex_replace', '^/', '')
+              | list
+            -%}
+
+            {%- if children | length > 0 -%}
+              {%- set _ = results.append({
+                'mount': target_path,
+                'device': fs.devices,
+                'subvolumes': children,
+                'uuid': fs.uuid
+              }) -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {{ results }}
+
+- name: Debug btrfs filesystem data
+  ansible.builtin.debug:
+    var: btrbk_configs
 #
 # - name: Assert path is a valid btrfs mount
 #   assert:
