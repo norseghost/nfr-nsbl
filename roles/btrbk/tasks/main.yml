@@ -26,7 +26,6 @@
     owner: root
     group: root
     mode: "0600"
-
 - name: Inspect btrfs filesystem
   community.general.btrfs_info:
   register: btrbk_btrfs_data
@@ -49,7 +48,7 @@
                1. parent must match root ID
                2. path must NOT have more than one level of nesting (regex)
                3. ignore hidden paths (starting with .)
-            #} 
+            #}
             {%- set children = fs.subvolumes
               | selectattr('parent', 'equalto', root_match.id)
               | map(attribute='path')

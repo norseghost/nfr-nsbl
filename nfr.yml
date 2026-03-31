@@ -1,5 +1,4 @@
 ---
-# ---
 # - name: Pre flight tasks
 #   hosts: all
 #   gather_facts: true
@@ -7,38 +6,92 @@
 #     - name: Define shorthand for host ipv4
 #       ansible.builtin.set_fact:
 #         ipv4_addr: "{{ ansible_facts.default_ipv4.address }}"
-# 
+#
 # - name: Common setup
 #   hosts: vps
 #   roles:
 #     - enroll
 #     - harden
 #     - caddy
-# 
+#
 # - name: Backup server
 #   hosts: backup
 #   roles:
 #     - backup
-# 
+#
 # - name: Set up headscale orchestrator
 #   hosts: vpn
 #   gather_facts: true
 #   roles:
 #     - headscale
 #     - ntfy
-# 
+#
 # - name: Set up VPSes
 #   hosts: vps
 #   roles:
 #     - tailscale
-# 
+#
 # - name: Set up UnRAID
 #   hosts: nas
 #   roles:
 #     - unraid
 #     - unraid_btrbk
-# 
+#
 - name: Set up server nodes
-  hosts: trym
-  roles:
-    - minecraft
+  hosts:
+    - trym
+    - nas
+  vars:
+    btrbk_volumes:
+      - /mnt/disk4
+      - /mnt/sysdata
+      - /srv
+  tasks:
+    - name: Inspect btrfs filesystem
+      community.general.btrfs_info:
+      register: btrbk_btrfs_data
+
+    - name: Debug btrfs filesystem data
+      ansible.builtin.debug:
+        var: btrbk_btrfs_data
+
+    - name: Process Btrfs data for btrbk targets
+      set_fact:
+        btrbk_configs: >-
+          {%- set results = [] -%}
+          {%- for fs in btrbk_btrfs_data.filesystems -%}
+            {%- for target_path in btrbk_volumes -%}
+              {# Find the ID of the subvolume actually mounted at our target #}
+              {%- set root_match = fs.subvolumes | selectattr('mountpoints', 'contains', target_path) | first | default(none) -%}
+
+              {%- if root_match -%}
+                {# filter:
+                   1. parent must match root ID
+                   2. path must NOT have more than one level of nesting (regex)
+                   3. ignore hidden paths (starting with .)
+                #}
+                {%- set children = fs.subvolumes
+                  | selectattr('parent', 'equalto', root_match.id)
+                  | map(attribute='path')
+                  | reject('match', '^/[^/]+/[^/]+')
+                  | select('match', '^/(?!\\.).*')
+                  | map('regex_replace', '^/', '')
+                  | list
+                -%}
+
+                {%- if children | length > 0 -%}
+                  {%- set _ = results.append({
+                    'mount': target_path,
+                    'device': fs.devices,
+                    'subvolumes': children,
+                    'uuid': fs.uuid
+                  }) -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+          {{ results }}
+
+    - name: Debug btrfs filesystem data
+      ansible.builtin.debug:
+        var: btrbk_configs
