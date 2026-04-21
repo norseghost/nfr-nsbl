@@ -1,4 +1,28 @@
 ---
+- block:
+  - name: Make sure host and path are set
+    ansible.builtin.assert:
+      that:
+        - btrbk_remote != ""
+        - btrbk_remote_path != ""
+      fail_msg:  "You need to set a remote host and path for remote backup"
+
+  - name: Make sure SSH identity is set
+    ansible.builtin.assert:
+      that:
+        - btrbk_ssh_private_key != ""
+        - btrbk_ssh_public_key != ""
+      fail_msg:  "You need to set a SSH key pair for remote backup"
+
+  when: btrbk_remote_send is true
+
+- name: Make sure volumes to back up is set
+  ansible.builtin.assert:
+    that:
+      - btrbk_volumes != {}
+    fail_msg:  "You need to specify volumes to back up"
+
+
 - name: Ensure dependencies for btrbk
   ansible.builtin.apt:
     name: curl

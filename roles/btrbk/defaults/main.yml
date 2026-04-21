@@ -5,9 +5,14 @@ btrbk_snapshot_min: "latest"
 btrbk_snapshot_freq: "24h 7d 4w 3m"
 btrbk_target_min: "latest"
 btrbk_target_freq: "24h 31d 12w 6m"
+btrbk_snapshot_location: ".snapshots"
+btrbk_remote_send: true
 btrbk_remote: ""
 btrbk_remote_path: ""
+# any btrfs subvolumes that are
+# - immediate children
+# - not hidden
+# will be backed up
 btrbk_volumes: {}
-btrbk_snapshot_location: ""
 btrbk_ssh_private_key: ""
 btrbk_ssh_public_key: ""
