@@ -1,0 +1,45 @@
+---
+- name: Include UnRAID specific variables
+  include_vars: unraid.yml
+
+# This song-and-dance is to work around the extremely high precedence of
+  # role variables in Ansible
+- name: UnRAID - apply variables
+  ansible.builtin.set_fact:
+    "{{ item.key }}": "{{ item.value }}"
+  loop: "{{ btrbk_unraid_vars | dict2items }}"
+  when: lookup('vars', item.key, default=none) is none
+
+- name: UnRAID - Ensure directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "99"
+    group: "100"
+    mode: "0750"
+  loop:
+    - "{{ btrbk_app_dir }}/bin"
+    - "{{ btrbk_app_dir }}/logs"
+    - "{{ btrbk_conf_dir }}"
+
+- name: UnRAID - Download btrbk
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/digint/btrbk/master/btrbk"
+    dest: "{{ btrbk_app_dir }}/bin/btrbk"
+    mode: "0754"
+
+- name: UnRAID - Schedule backups
+  ansible.builtin.copy:
+    dest: /etc/cron.d/btrbk
+    content: "{{ btrbk_cronstring }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: UnRAID - Persist scheduled backups
+  ansible.builtin.blockinfile:
+    path: /boot/config/go
+    marker: "# {mark} ANSIBLE BTRBK CRON"
+    block: |
+      # btrbk cron
+      echo "{{ btrbk_cronstring }}" > /etc/cron.d/btrbk

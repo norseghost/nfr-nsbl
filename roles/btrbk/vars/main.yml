@@ -3,6 +3,7 @@ btrbk_default_vars:
   btrbk_conf_dir: "/etc/btrbk"
   btrbk_ssh_dir: "{{ btrbk_conf_dir }}/ssh"
   btrbk_schedule: "hourly"
+  btrbk_command: "/usr/bin/btrbk"
 
 btrbk_unraid_vars:
   btrbk_app_dir: /mnt/user/appdata/btrbk
@@ -10,4 +11,5 @@ btrbk_unraid_vars:
   btrbk_ssh_dir: "{{ btrbk_app_dir }}/ssh"
   # UnRAID/Slackware uses cron, not systemd
   btrbk_schedule: "0 * * * *"
-  btrbk_command: "{{ btrbk_app_dir }}/bin/btrbk -c {{ btrbk_conf_dir }}/btrbk.conf"7
+  btrbk_command: "{{ btrbk_app_dir }}/bin/btrbk -c {{ btrbk_conf_dir }}/btrbk.conf"
+  btrbk_cronstring: "{{btrbk_schedule }} {{ btrbk_command }} run"

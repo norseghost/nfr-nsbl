@@ -22,34 +22,38 @@
       - btrbk_volumes != {}
     fail_msg:  "You need to specify volumes to back up"
 
+- name: Include UnRAID tasks
+  include_task: unraid.yml
+  when: "'Unraid' in ansible_facts.kernel"
 
-- name: Ensure dependencies for btrbk
-  ansible.builtin.apt:
-    name: curl
-    state: present
-    update_cache: true
+- name: Include other distribution tasks
+  include_task: "{{ ansible_facts.ansible_distribution | lower }}.yml"
+  when: "'Unraid' not in ansible_facts.kernel"
 
-- name: Install btrbk from package
-  ansible.builtin.apt:
-    name: btrbk
-    state: present
-  failed_when: false
-
-- name: Create btrbk configuration direcrtory
+- name: Create btrbk SSH directory
   ansible.builtin.file:
-    path: "{{ btrbk_config_dir }}"
+    path: "{{ btrbk_ssh_dir }}"
     state: directory
     owner: root
     group: root
-    mode: "0750"
+    mode: "0700"
 
 - name: Copy btrbk ssh identity file
   ansible.builtin.copy:
     content: "{{ btrbk_ssh_private_key }}"
-    dest: "{{ btrbk_ssh_identity }}"
+    dest: "{{ btrbk_ssh_dir }}/{{ btrbk_ssh_identity }}"
     owner: root
     group: root
     mode: "0600"
+
+- name: Generate btrbk.conf
+  ansible.builtin.template:
+    dest: "{{ btrbk_conf_dir }}/btrbk.conf"
+    owner: "99"
+    group: "100"
+    mode: "0644"
+    src: btrbk.conf.j2
+
 - name: Inspect btrfs filesystem
   community.general.btrfs_info:
   register: btrbk_btrfs_data
@@ -98,14 +102,14 @@
 - name: Debug btrfs filesystem data
   ansible.builtin.debug:
     var: btrbk_configs
-#
-# - name: Assert path is a valid btrfs mount
-#   assert:
-#     that:
-#       - item.failed == false
-#     fail_msg: "The path {{ item.item }} is not a valid Btrfs filesystem."
-#   loop: "{{ btrbk_btrfs_data.results }}"
 
+- name: Dry run planned backups
+  ansible.builtin.command:
+    cmd: "{{ btrbk_command }} dryrun"
+  check_mode: false
+  register: unraid_btrbk_output
+  changed_when: false # Prevents the task from reporting "changed" every time
 
-# - name: Set up btrbk subvolumes
-# - name: Set up btrbk configuration
+- name: Display btrbk dry run results
+  ansible.builtin.debug:
+    var: unraid_btrbk_output.stdout_lines
