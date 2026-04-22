@@ -1,0 +1,7 @@
+---
+btrbk_app_dir: /mnt/user/appdata/btrbk
+btrbk_conf_dir: "{{ btrbk_app_dir }}/conf"
+btrbk_ssh_dir: "{{ btrbk_app_dir }}/ssh"
+# UnRAID/Slackware uses cron, not systemd
+btrbk_schedule: "0 * * * *"
+btrbk_command: "{{ btrbk_app_dir }}/bin/btrbk -c {{ btrbk_conf_dir }}/btrbk.conf"

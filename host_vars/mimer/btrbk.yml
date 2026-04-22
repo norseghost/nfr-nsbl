@@ -1,0 +1,9 @@
+---
+btrbk_remote: kvasir.ts.h0g.in
+btrbk_remote_path: /mnt/botn
+btrbk_volumes:
+  - /mnt/disk4/
+  - /mnt/sysdata/
+btrbk_ssh_identity: "{{ btrbk_app_dir }}/ssh/id_btrbk"
+btrbk_ssh_private_key: "{{ ssh.private_key }}"
+btrbk_ssh_public_key: "{{ user.pubkey }}"
