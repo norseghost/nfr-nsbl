@@ -1,15 +1,11 @@
 ---
-btrbk_config_dir: "/etc/btrbk"
-btrbk_ssh_identity: "{{ btrbk_config_dir }}/id_btrbk"
 btrbk_snapshot_min: "latest"
 btrbk_snapshot_freq: "24h 7d 4w 3m"
 btrbk_target_min: "latest"
 btrbk_target_freq: "24h 31d 12w 6m"
 btrbk_snapshot_location: ".snapshots"
-btrbk_conf_dir: "/etc/btrbk"
-btrbk_ssh_dir: "{{ btrbk_conf_dir }}/ssh"
-btrbk_ssh_identity: "{{ btrbk_ssh_dir }}/id_btrbk"
-btrbk_schedule: "hourly"
+btrbk_ssh_identity: "id_btrbk"
+btrbk_user: "root"
 btrbk_remote_send: true
 btrbk_remote: ""
 btrbk_remote_path: ""
