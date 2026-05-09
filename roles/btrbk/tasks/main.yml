@@ -5,7 +5,7 @@
       that:
         - btrbk_remote != ""
         - btrbk_remote_path != ""
-      fail_msg:  "You need to set a remote host and path for remote backup"
+      fail_msg: "You need to set a remote host and path for remote backup"
 
   - name: Make sure SSH identity is set
     ansible.builtin.assert:
@@ -49,60 +49,19 @@
 
 - name: Inspect btrfs filesystem
   community.general.btrfs_info:
-  register: btrbk_btrfs_data
+  register: btrbk_btrfs_info
 
-- name: Debug btrfs filesystem data
-  ansible.builtin.debug:
-    var: btrbk_btrfs_data
-
-- name: Process Btrfs data for btrbk targets
+- name: Build dict of mounted btrfs filesystems
   set_fact:
-    btrbk_configs: >-
-      {%- set results = [] -%}
-      {%- for fs in btrbk_btrfs_data.filesystems -%}
-        {%- for target_path in btrbk_volumes -%}
-          {# Find the ID of the subvolume actually mounted at our target #}
-          {%- set root_match = fs.subvolumes | selectattr('mountpoints', 'contains', target_path) | first | default(none) -%}
-
-          {%- if root_match -%}
-            {# filter:
-               1. parent must match root ID
-               2. path must NOT have more than one level of nesting (regex)
-               3. ignore hidden paths (starting with .)
-            #}
-            {%- set children = fs.subvolumes
-              | selectattr('parent', 'equalto', root_match.id)
-              | map(attribute='path')
-              | reject('match', '^/[^/]+/[^/]+')
-              | select('match', '^/(?!\\.).*')
-              | map('regex_replace', '^/', '')
-              | list
-            -%}
-
-            {%- if children | length > 0 -%}
-              {%- set _ = results.append({
-                'mount': target_path,
-                'device': fs.devices,
-                'subvolumes': children,
-                'uuid': fs.uuid
-              }) -%}
-            {%- endif -%}
-          {%- endif -%}
-        {%- endfor -%}
-      {%- endfor -%}
-      {{ results }}
-
-- name: Debug btrfs filesystem data
-  ansible.builtin.debug:
-    var: btrbk_configs
+    btrfs_subvolumes: "{{ btrbk_btrfs_info.filesystems | btrfs_subvol_dict }}"
 
 - name: Dry run planned backups
   ansible.builtin.command:
     cmd: "{{ btrbk_command }} dryrun"
   check_mode: false
-  register: unraid_btrbk_output
+  register: btrbk_dryrun_output
   changed_when: false # Prevents the task from reporting "changed" every time
 
 - name: Display btrbk dry run results
   ansible.builtin.debug:
-    var: unraid_btrbk_output.stdout_lines
+    var: btrbk_dryrun_output
