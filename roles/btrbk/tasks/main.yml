@@ -12,15 +12,8 @@
       that:
         - btrbk_ssh_private_key != ""
         - btrbk_ssh_public_key != ""
-      fail_msg:  "You need to set a SSH key pair for remote backup"
-
-  when: btrbk_remote_send is true
-
-- name: Make sure volumes to back up is set
-  ansible.builtin.assert:
-    that:
-      - btrbk_volumes != {}
-    fail_msg:  "You need to specify volumes to back up"
+      fail_msg: "You need to set a != {}
+    fail_msg: "You need to specify subvolumes to back up"
 
 - name: Include UnRAID tasks
   include_task: unraid.yml
