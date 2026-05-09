@@ -1,7 +1,4 @@
 ---
-- name: Include UnRAID specific variables
-  include_vars: unraid.yml
-
 # This song-and-dance is to work around the extremely high precedence of
   # role variables in Ansible
 - name: UnRAID - apply variables

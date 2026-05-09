@@ -16,11 +16,11 @@
     fail_msg: "You need to specify subvolumes to back up"
 
 - name: Include UnRAID tasks
-  include_task: unraid.yml
+  ansible.builtin.include_tasks: unraid.yml
   when: "'Unraid' in ansible_facts.kernel"
 
 - name: Include other distribution tasks
-  include_task: "{{ ansible_facts.ansible_distribution | lower }}.yml"
+  ansible.builtin.include_tasks: "{{ ansible_facts.ansible_distribution | lower }}.yml"
   when: "'Unraid' not in ansible_facts.kernel"
 
 - name: Create btrbk SSH directory
