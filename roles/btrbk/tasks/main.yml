@@ -1,24 +1,23 @@
 ---
-- block:
-  - name: Make sure host and path are set
-    ansible.builtin.assert:
-      that:
-        - btrbk_remote != ""
-        - btrbk_remote_path != ""
-      fail_msg: "You need to set a remote host and path for remote backup"
+- name: Make sure host and path are set
+  ansible.builtin.assert:
+    that:
+      - btrbk_remote != ""
+      - btrbk_remote_path != ""
+    fail_msg: "You need to set a remote host and path for remote backup"
 
-  - name: Make sure SSH identity is set
-    ansible.builtin.assert:
-      that:
-        - btrbk_ssh_private_key != ""
-        - btrbk_ssh_public_key != ""
-      fail_msg: "You need to specify a SSH key pair!"
+- name: Make sure SSH identity is set
+  ansible.builtin.assert:
+    that:
+      - btrbk_ssh_private_key != ""
+      - btrbk_ssh_public_key != ""
+    fail_msg: "You need to specify a SSH key pair!"
 
-  - name: Make sure subvolumes are specified
-    ansible.builtin.assert:
-      that:
-        - btrbk_subvolumes != ""
-      fail_msg: "You need to specify subvolumes to back up!"
+- name: Make sure subvolumes are specified
+  ansible.builtin.assert:
+    that:
+      - btrbk_subvolumes != ""
+    fail_msg: "You need to specify subvolumes to back up!"
 
 - name: Include UnRAID tasks
   ansible.builtin.include_tasks: unraid.yml
