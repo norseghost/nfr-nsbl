@@ -5,9 +5,17 @@
 
 # Role: BTRBK
 
-Sets up a host to back up specified subvolumes. If there is a wildcard (`*`
+Sets up a host to back up specified Btrfs subvolumes. If there is a wildcard (`*`
 character) in a specified suvolume, top level, non hidden subvolumes of the
-Btrfs path will be backed up
+Btrfs path will be backed up.
+
+Otherwise, specify subvolumes directly. If:
+
+- The subvolume does not exist
+- The path is not a subvolume
+- 'wildcard' paths exist, but are not subvolumes
+
+The role continues, with a report of possible issues
 
 [`btrbk`](https://digint.ch/btrbk) handles incremental snapshots and
 sending data to a remote server.
@@ -20,15 +28,8 @@ A remote target can also be specified, with divergent retention policy.
 
 # Brainstorming and Future Plans
 
-- [x] Subvolumes under defined Btrfs volumes are auto-discovered
-    - [ ] This could be a toggle
 - [ ] Remote host backup is de facto a toggle - if `btrbk_remote_host` is
   unset, do not write remote targets to template
 - [x] if `btrbk_snapshot_dir` is missing, it is created
-    - [ ] Should it also be a subvolume?
-    - [ ] What if it exists, but is not as configured
-    - [ ] Another toggle
-- [ ] Needs to fail if:
-    - The specified volume isn't Btrfs
-    - There are no top level subvolumes to back up
-- Consideration: specify non top level subvolumes
+    - [ ] Not as a subvolume
+    - [ ] distinguish local/global? or antifeature?
