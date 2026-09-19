@@ -138,6 +138,17 @@
   when:
     - btrbk_btrfs_candidates is defined
 
+- name: Dry run planned backups
+  ansible.builtin.command:
+    cmd: "{{ btrbk_command }} dryrun"
+  check_mode: false
+  register: btrbk_dryrun_output
+  changed_when: false # Prevents the task from reporting "changed" every time
+
+- name: Display btrbk dry run results
+  ansible.builtin.debug:
+    var: btrbk_dryrun_output.stdout_lines
+
 - name: Report Btrfs subvolume issues
   ansible.builtin.debug:
     msg: '{{ item }}'
