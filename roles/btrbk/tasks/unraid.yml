@@ -1,11 +1,11 @@
 ---
 # This song-and-dance is to work around the extremely high precedence of
-  # role variables in Ansible
+# role variables in Ansible
 - name: UnRAID - apply variables
   ansible.builtin.set_fact:
     "{{ item.key }}": "{{ item.value }}"
   loop: "{{ btrbk_unraid_vars | dict2items }}"
-  when: lookup('vars', item.key, default=none) is none
+  when: query('varnames', item.key) | length == 0
 
 - name: UnRAID - Ensure directories exist
   ansible.builtin.file:
