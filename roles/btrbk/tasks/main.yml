@@ -56,15 +56,87 @@
   register: btrbk_btrfs_info
 
 - name: Build dict of mounted btrfs filesystems
-  set_fact:
-    btrfs_subvolumes: "{{ btrbk_btrfs_info.filesystems | btrfs_subvol_dict }}"
+  ansible.builtin.set_fact:
+    btrbk_btrfs_subvolumes: "{{ btrbk_btrfs_info.filesystems | btrfs_subvol_dict }}"
 
-- name: Dry run planned backups
-  ansible.builtin.command:
-    cmd: "{{ btrbk_command }} dryrun"
-  check_mode: false
-  register: btrbk_dryrun_output
-  changed_when: false # Prevents the task from reporting "changed" every time
+- name: Check for subvolumes to back up
+  ansible.builtin.set_fact:
+    btrbk_btrfs_found: >-
+      {{
+        btrbk_btrfs_found | default([])
+        + (
+          (
+            btrbk_btrfs_subvolumes.keys() | list
+            | select(
+                'match',
+                '^' ~ (item[:-1] | regex_escape) ~ '[^/]+$'
+              )
+            | list
+          )
+          if item.endswith('/*')
+          else [item]
+          if item in btrbk_btrfs_subvolumes
+          else []
+        )
+      }}
+    btrbk_btrfs_missing: >-
+      {{
+        btrbk_btrfs_missing | default([])
+        + (
+          [item]
+          if (
+            item.endswith('/*')
+            and (
+              btrbk_btrfs_subvolumes.keys() | list
+              | select(
+                  'match',
+                  '^' ~ (item[:-1] | regex_escape) ~ '[^/]+$'
+                )
+              | list
+              | length == 0
+            )
+          )
+          or (
+            not item.endswith('/*')
+            and item not in btrbk_btrfs_subvolumes
+          )
+          else []
+        )
+      }}
+  loop: "{{ btrbk_subvolumes }}"
+
+- name: Find directories under Btrfs wildcard paths
+  ansible.builtin.find:
+    paths: "{{ item[:-2] }}"
+    recurse: false
+    file_type: directory
+    hidden: true
+  register: btrbk_wildcard_directories
+  loop: "{{ btrbk_subvolumes | select('search', '\\*$') | list }}"
+
+- name: Build wildcard directory candidates
+  ansible.builtin.set_fact:
+    btrbk_btrfs_candidates: >-
+      {{
+        btrbk_btrfs_candidates | default([])
+        + (
+          item.files
+          | map(attribute='path')
+          | list
+        )
+      }}
+  loop: "{{ btrbk_wildcard_directories.results }}"
+
+- name: Remove found Btrfs subvolumes from wildcard candidates
+  ansible.builtin.set_fact:
+    btrbk_btrfs_candidates: >-
+      {{
+        btrbk_btrfs_candidates
+        | difference(btrbk_btrfs_found)
+        | sort
+      }}
+  when:
+    - btrbk_btrfs_candidates is defined
 
 - name: Report Btrfs subvolume issues
   ansible.builtin.debug:
