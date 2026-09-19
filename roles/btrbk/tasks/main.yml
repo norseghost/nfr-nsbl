@@ -66,6 +66,15 @@
   register: btrbk_dryrun_output
   changed_when: false # Prevents the task from reporting "changed" every time
 
-- name: Display btrbk dry run results
+- name: Report Btrfs subvolume issues
   ansible.builtin.debug:
-    var: btrbk_dryrun_output
+    msg: '{{ item }}'
+  vars:
+    item:
+      - candidates: '{{ btrbk_btrfs_candidates | default([]) }}'
+      - missing: '{{ btrbk_btrfs_missing }}'
+      - found: '{{ btrbk_btrfs_found }}'
+  when:
+    - btrbk_btrfs_missing | length > 0
+      or btrbk_btrfs_candidates is defined
+      or btrbk_btrfs_found | length > 0
