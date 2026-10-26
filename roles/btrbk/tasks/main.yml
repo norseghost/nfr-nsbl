@@ -138,6 +138,13 @@
   when:
     - btrbk_btrfs_candidates is defined
 
+- name: Create snapshot directories
+  ansible.builtin.file:
+    path: "{{ item }}/.snapshots"
+    state: directory
+    mode: "0755"
+  loop: "{{ btrbk_btrfs_found }}"
+
 - name: Dry run planned backups
   ansible.builtin.command:
     cmd: "{{ btrbk_command }} dryrun"
