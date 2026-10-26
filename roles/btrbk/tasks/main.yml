@@ -1,0 +1,190 @@
+---
+- name: Make sure host and path are set
+  ansible.builtin.assert:
+    that:
+      - btrbk_remote != ""
+      - btrbk_remote_path != ""
+    fail_msg: "You need to set a remote host and path for remote backup"
+
+- name: Make sure SSH identity is set
+  ansible.builtin.assert:
+    that:
+      - btrbk_ssh_private_key != ""
+      - btrbk_ssh_public_key != ""
+    fail_msg: "You need to specify a SSH key pair!"
+
+- name: Make sure subvolumes are specified
+  ansible.builtin.assert:
+    that:
+      - btrbk_subvolumes != ""
+    fail_msg: "You need to specify subvolumes to back up!"
+
+- name: Include UnRAID tasks
+  ansible.builtin.include_tasks: unraid.yml
+  when: "'Unraid' in ansible_facts.kernel"
+
+- name: Include other distribution tasks
+  ansible.builtin.include_tasks: "{{ ansible_facts.distribution | lower }}.yml"
+  when: "'Unraid' not in ansible_facts.kernel"
+
+- name: Create btrbk SSH directory
+  ansible.builtin.file:
+    path: "{{ btrbk_ssh_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Copy btrbk ssh identity file
+  ansible.builtin.copy:
+    content: "{{ btrbk_ssh_private_key }}"
+    dest: "{{ btrbk_ssh_dir }}/{{ btrbk_ssh_identity }}"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Ensure root SSH directory exists
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Inspect btrfs filesystem
+  community.general.btrfs_info:
+  register: btrbk_btrfs_info
+
+- name: Build dict of mounted btrfs filesystems
+  ansible.builtin.set_fact:
+    btrbk_btrfs_subvolumes: "{{ btrbk_btrfs_info.filesystems | btrfs_subvol_dict }}"
+
+- name: Check for subvolumes to back up
+  ansible.builtin.set_fact:
+    btrbk_btrfs_found: >-
+      {{
+        btrbk_btrfs_found | default([])
+        + (
+          (
+            btrbk_btrfs_subvolumes.keys() | list
+            | select(
+                'match',
+                '^' ~ (item[:-1] | regex_escape) ~ '[^/]+$'
+              )
+            | list
+          )
+          if item.endswith('/*')
+          else [item]
+          if item in btrbk_btrfs_subvolumes
+          else []
+        )
+        | reject('match', '.*/[.][^/]+$')
+        | list
+      }}
+    btrbk_btrfs_missing: >-
+      {{
+        btrbk_btrfs_missing | default([])
+        + (
+          [item]
+          if (
+            item.endswith('/*')
+            and (
+              btrbk_btrfs_subvolumes.keys() | list
+              | select(
+                  'match',
+                  '^' ~ (item[:-1] | regex_escape) ~ '[^/]+$'
+                )
+              | list
+              | length == 0
+            )
+          )
+          or (
+            not item.endswith('/*')
+            and item not in btrbk_btrfs_subvolumes
+          )
+          else []
+        )
+      }}
+  loop: "{{ btrbk_subvolumes }}"
+
+- name: Find directories under Btrfs wildcard paths
+  ansible.builtin.find:
+    paths: "{{ item[:-2] }}"
+    recurse: false
+    file_type: directory
+    hidden: true
+  register: btrbk_wildcard_directories
+  loop: "{{ btrbk_subvolumes | select('search', '\\*$') | list }}"
+
+- name: Build wildcard directory candidates
+  ansible.builtin.set_fact:
+    btrbk_btrfs_candidates: >-
+      {{
+        btrbk_btrfs_candidates | default([])
+        + (
+          item.files
+          | map(attribute='path')
+          | list
+        )
+      }}
+  loop: "{{ btrbk_wildcard_directories.results }}"
+
+- name: Remove found Btrfs subvolumes from wildcard candidates
+  ansible.builtin.set_fact:
+    btrbk_btrfs_candidates: >-
+      {{
+        btrbk_btrfs_candidates
+        | difference(btrbk_btrfs_found)
+        | sort
+      }}
+  when:
+    - btrbk_btrfs_candidates is defined
+
+- name: Create snapshot directories
+  ansible.builtin.file:
+    path: "{{ item }}/.snapshots"
+    state: directory
+    mode: "0755"
+  loop: "{{ btrbk_btrfs_found }}"
+
+- name: Generate btrbk.conf
+  ansible.builtin.template:
+    dest: "{{ btrbk_conf_dir }}/btrbk.conf"
+    owner: "99"
+    group: "100"
+    mode: "0644"
+    src: btrbk.conf.j2
+
+- name: Create btrbk target directories
+  ansible.builtin.file:
+    path: "{{ btrbk_remote_path }}/{{ inventory_hostname }}/{{ item | basename }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ btrbk_btrfs_found }}"
+  delegate_to: "{{ btrbk_remote }}"
+
+- name: Dry run planned backups
+  ansible.builtin.command:
+    cmd: "{{ btrbk_command }} dryrun"
+  check_mode: false
+  register: btrbk_dryrun_output
+  changed_when: false # Prevents the task from reporting "changed" every time
+
+- name: Display btrbk dry run results
+  ansible.builtin.debug:
+    var: btrbk_dryrun_output.stdout_lines
+
+- name: Report Btrfs subvolume issues
+  ansible.builtin.debug:
+    msg: '{{ item }}'
+  vars:
+    item:
+      - candidates: '{{ btrbk_btrfs_candidates | default([]) }}'
+      - missing: '{{ btrbk_btrfs_missing }}'
+      - found: '{{ btrbk_btrfs_found }}'
+  when:
+    - btrbk_btrfs_missing | length > 0
+      or btrbk_btrfs_candidates is defined
+      or btrbk_btrfs_found | length > 0

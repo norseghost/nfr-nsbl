@@ -1,0 +1,35 @@
+---
+- name: Set default variables
+  ansible.builtin.set_fact:
+    "{{ item.key }}": "{{ item.value }}"
+  loop: "{{ btrbk_default_vars | dict2items }}"
+  when: query('varnames', item.key) | length == 0
+
+- name: Install btrbk from package
+  ansible.builtin.apt:
+    name: btrbk
+    state: present
+  failed_when: true
+
+- name: Create btrbk timer override directory
+  ansible.builtin.file:
+    mode: "0755"
+    path: /etc/systemd/system/btrbk.timer.d/
+    state: directory
+
+- name: Override systemd timer schedule
+  ansible.builtin.copy:
+    mode: "0755"
+    dest: /etc/systemd/system/btrbk.timer.d/override.conf
+    content: |
+      [Timer]
+      OnCalendar={{ btrbk_schedule }}
+  notify:
+    - systemd daemon reload
+    - restart btrbk timer
+
+- name: Ensure btrbk timer is enabled and running
+  ansible.builtin.systemd:
+    name: btrbk.timer
+    enabled: true
+    state: started

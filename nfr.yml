@@ -1,5 +1,4 @@
 ---
-# ---
 # - name: Pre flight tasks
 #   hosts: all
 #   gather_facts: true
@@ -36,10 +35,10 @@
 #   hosts: nas
 #   roles:
 #     - unraid
-#     - unraid_btrbk
 #
-
 - name: Set up server nodes
-  hosts: trym
+  hosts:
+    - trym
+    - mimer
   roles:
     - btrbk

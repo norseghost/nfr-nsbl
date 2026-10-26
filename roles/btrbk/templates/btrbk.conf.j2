@@ -1,0 +1,15 @@
+# Retention Policy: 24 hourly, 7 daily, 4 weekly, 3 monthly
+snapshot_preserve_min      {{ btrbk_snapshot_min }}
+snapshot_preserve          {{ btrbk_snapshot_freq }}
+target_preserve_min        {{ btrbk_target_min }}
+target_preserve            {{ btrbk_target_freq }}
+{% if btrbk_ssh_identity %}
+ssh_identity {{btrbk_ssh_dir }}/{{ btrbk_ssh_identity }}
+{% endif %}
+# Volume Definitions
+{% for sub in btrbk_btrfs_found %}
+subvolume {{ sub }}
+  snapshot_dir {{ sub }}/.snapshots
+  snapshot_name {{ sub | basename }}
+  target ssh://{{ btrbk_remote }}{{ btrbk_remote_path }}/{{ inventory_hostname }}/{{ sub | basename }}
+{% endfor %}
