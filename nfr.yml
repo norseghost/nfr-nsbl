@@ -38,6 +38,13 @@
 #     - unraid_btrbk
 #
 - name: Set up server nodes
-  hosts: trym
+  # vars:
+  #   btrbk_subvolumes:
+  #     - /srv/*
+  #     - /srv/test/test
+  #     - /not/avaliable
+  hosts:
+    - trym
+    - mimer
   roles:
-    - btrfs
+    - btrbk
