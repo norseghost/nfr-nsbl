@@ -78,6 +78,8 @@
           if item in btrbk_btrfs_subvolumes
           else []
         )
+        | reject('match', '.*/[.][^/]+$')
+        | list
       }}
     btrbk_btrfs_missing: >-
       {{
