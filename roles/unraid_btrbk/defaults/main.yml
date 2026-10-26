@@ -1,8 +1,0 @@
----
-unraid_btrbk_install_dir: /mnt/user/appdata/btrbk
-unraid_btrbk_cron_schedule: "0 * * * *"
-unraid_btrbk_command: "{{ unraid_btrbk_install_dir }}/bin/btrbk -c {{ unraid_btrbk_install_dir }}/config/btrbk.conf"
-unraid_btrbk_remote: ""
-unraid_btrbk_remote_path: ""
-
-unraid_btrbk_volumes: {}
