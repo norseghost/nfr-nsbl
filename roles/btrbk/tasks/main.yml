@@ -43,13 +43,13 @@
     group: root
     mode: "0600"
 
-- name: Generate btrbk.conf
-  ansible.builtin.template:
-    dest: "{{ btrbk_conf_dir }}/btrbk.conf"
-    owner: "99"
-    group: "100"
-    mode: "0644"
-    src: btrbk.conf.j2
+- name: Ensure root SSH directory exists
+  ansible.builtin.file:
+    path: /root/.ssh
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
 
 - name: Inspect btrfs filesystem
   community.general.btrfs_info:
