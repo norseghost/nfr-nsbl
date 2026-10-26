@@ -33,11 +33,16 @@ dns:
   override_local_dns: {{ headscale.dns.override_local | bool }}
   magic_dns: {{ headscale.dns.magic | bool }}
   base_domain: {{ headscale.dns.base_domain }}
+  search_domains:
+    - "{{ lan_domain }}"
   nameservers:
     global:
 {% for ns in headscale.dns.nameservers.global %}
       - {{ ns }}
 {% endfor %}
+    split:
+      " {{ lan_domain }} ":
+        - " {{ lan_dns_server }} "
 {% endif %}
 
 {% if headscale.derp.enabled %}

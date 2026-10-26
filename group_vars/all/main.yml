@@ -26,4 +26,6 @@ headscale_users:
   - heimdall
 tailscale_user: heimdall
 lan_cidr: 10.10.0.0/16
+lan_domain: home.m0n.in
+lan_dns_server: 10.10.0.1
 tailnet_cidr: 100.64.0.0/10
