@@ -35,7 +35,6 @@
 #   hosts: nas
 #   roles:
 #     - unraid
-#     - unraid_btrbk
 #
 - name: Set up server nodes
   # vars:
