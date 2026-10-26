@@ -1,6 +1,6 @@
 ---
-btrbk_remote: "mimer.ts.h0g.in"
-btrbk_remote_path: "/mnt/user/backups/{{ ansible_facts.hostname }}"
+btrbk_remote: "mimer.home.m0n.in"
+btrbk_remote_path: "/mnt/sysdata/backups"
 # if subvolumes are specified with a wildcard,
 # any btrfs subvolumes that are
 # - immediate children
