@@ -1,4 +1,7 @@
 # Retention Policy: 24 hourly, 7 daily, 4 weekly, 3 monthly
+transaction_syslog cron
+transaction_log /var/log/btrbk.log
+lockfile /var/lock/btrbk.lock
 snapshot_preserve_min      {{ btrbk_snapshot_min }}
 snapshot_preserve          {{ btrbk_snapshot_freq }}
 target_preserve_min        {{ btrbk_target_min }}
