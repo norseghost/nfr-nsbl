@@ -6,13 +6,17 @@ btrbk_target_freq: "24h 31d 12w 6m"
 btrbk_snapshot_location: ".snapshots"
 btrbk_ssh_identity: "id_btrbk"
 btrbk_user: "root"
-btrbk_remote_send: true
-btrbk_remote: ""
-btrbk_remote_path: ""
-# any btrfs subvolumes that are
-# - immediate children
-# - not hidden
-# will be backed up
+# specify at least one pair for remote backups:
+# - host: backup.host
+#   path: /path/on/remote/
+btrbk_remotes: []
+# list of subvolumes to back up
+# a `/path/to/wildcard/*`
+# will pick up any immediate children subvolumes
+# that are not `.hidden`
 btrbk_subvolumes: {}
+# only required for remote backups
+# currently globally configured - each remote gets
+# the same key pair
 btrbk_ssh_private_key: ""
 btrbk_ssh_public_key: ""

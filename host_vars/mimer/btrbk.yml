@@ -1,6 +1,7 @@
 ---
-btrbk_remote: kvasir.ts.h0g.in
-btrbk_remote_path: /mnt/botn
+btrbk_remotes:
+  - host: kvasir.ts.h0g.in
+    path: /mnt/botn
 btrbk_subvolumes:
   - /mnt/disk4/*
   - /mnt/sysdata/*

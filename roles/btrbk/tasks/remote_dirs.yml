@@ -1,0 +1,10 @@
+---
+- name: Create remote backup directories
+  ansible.builtin.file:
+    path: "{{ remote.path }}/{{ inventory_hostname }}/{{ item | basename }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ btrbk_btrfs_found }}"
+  delegate_to: "{{ remote.host }}"

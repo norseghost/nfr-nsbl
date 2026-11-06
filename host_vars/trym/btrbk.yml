@@ -1,1 +1,8 @@
 btrbk_schedule: "*:0,15,30,45"
+btrbk_remotes:
+# Specify at least one host:path pair.
+# Each pair will be added as a remote per subvolume
+  - host: "mimer.home.m0n.in"
+    path: "/mnt/sysdata/backups"
+  - host: "kvasir.ts.h0g.in"
+    path: "/mnt/botn"

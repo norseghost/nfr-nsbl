@@ -24,11 +24,13 @@ By default, local snapshots are created in a `.snapshots` folder in the
 root of the specified subvolume. Alternately, snapshots can be created in a
 `.snapshots` directory on the root of the Btrfs volume.
 
-A remote target can also be specified, with divergent retention policy.
+Remote targets can also be specified, with divergent retention policy.
 
 # Brainstorming and Future Plans
 
-- [ ] Remote host backup is de facto a toggle - if `btrbk_remote_host` is
+- [-] Add per host ssh key pairs
+- [-] Add per-subvolume remote and scheduling capabilities
+- [-] Remote host backup is de facto a toggle - if `btrbk_remote_host` is
   unset, do not write remote targets to template
 - [x] if `btrbk_snapshot_dir` is missing, it is created
     - [ ] Not as a subvolume

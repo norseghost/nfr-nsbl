@@ -14,5 +14,7 @@ ssh_identity {{btrbk_ssh_dir }}/{{ btrbk_ssh_identity }}
 subvolume {{ sub }}
   snapshot_dir {{ sub }}/.snapshots
   snapshot_name {{ sub | basename }}
-  target ssh://{{ btrbk_remote }}{{ btrbk_remote_path }}/{{ inventory_hostname }}/{{ sub | basename }}
+  {% for remote in btrbk_remotes | default([]) %}
+  target ssh://{{ remote.host }}{{ remote.path }}/{{ inventory_hostname }}/{{ sub | basename }}
+  {% endfor %}
 {% endfor %}

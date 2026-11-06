@@ -9,7 +9,6 @@
   ansible.builtin.apt:
     name: btrbk
     state: present
-  failed_when: true
 
 - name: Create btrbk timer override directory
   ansible.builtin.file:

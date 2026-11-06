@@ -1,10 +1,10 @@
 ---
 - name: Make sure host and path are set
-  ansible.builtin.assert:
-    that:
-      - btrbk_remote != ""
-      - btrbk_remote_path != ""
-    fail_msg: "You need to set a remote host and path for remote backup"
+  ansible.builtin.debug:
+    msg: "btrbk_remotes is unset. Skipping remote backups."
+  when: btrbk_remotes | default([]) | length == 0
+  vars:
+    ansible_verbose_always: true
 
 - name: Make sure SSH identity is set
   ansible.builtin.assert:
@@ -12,6 +12,8 @@
       - btrbk_ssh_private_key != ""
       - btrbk_ssh_public_key != ""
     fail_msg: "You need to specify a SSH key pair!"
+  when: btrbk_remotes | default([]) | length == 0
+
 
 - name: Make sure subvolumes are specified
   ansible.builtin.assert:
@@ -155,15 +157,12 @@
     mode: "0644"
     src: btrbk.conf.j2
 
-- name: Create btrbk target directories
-  ansible.builtin.file:
-    path: "{{ btrbk_remote_path }}/{{ inventory_hostname }}/{{ item | basename }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  loop: "{{ btrbk_btrfs_found }}"
-  delegate_to: "{{ btrbk_remote }}"
+- name: Prepare remote backup directories
+  ansible.builtin.include_tasks: remote_dirs.yml
+  loop: "{{ btrbk_remotes | default([]) }}"
+  loop_control:
+    loop_var: remote
+    label: "{{ remote.host }}"
 
 - name: Dry run planned backups
   ansible.builtin.command:
